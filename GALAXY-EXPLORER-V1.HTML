@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Galaxy Explorer Final</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Arial', sans-serif;
+            touch-action: none;
+            color: white;
+        }
+        canvas {
+            display: block;
+        }
+        #ui-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        /* Panel de información */
+        #info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            max-width: 200px;
+            backdrop-filter: blur(5px);
+            pointer-events: auto;
+            z-index: 100;
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.5);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+        }
+        #mode-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            background: rgba(0, 100, 200, 0.7);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            pointer-events: auto;
+            backdrop-filter: blur(5px);
+            font-size: 12px;
+            z-index: 100;
+            box-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+        #mode-toggle:hover {
+            background: rgba(0, 150, 255, 0.9);
+            transform: scale(1.05);
+        }
+        
+        /* Loading screen */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .progress-bar {
+            width: 80%;
+            max-width: 300px;
+            height: 15px;
+            background: #333;
+            border-radius: 8px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #0066ff, #00ccff);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .planet-info {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #aaa;
+        }
+        
+        /* Controles de velocidad en la parte superior derecha */
+        #speed-controls {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 90;
+            pointer-events: auto;
+        }
+        
+        .speed-btn {
+            padding: 6px 10px;
+            background: rgba(0, 100, 200, 0.7);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            backdrop-filter: blur(5px);
+            font-size: 11px;
+            pointer-events: auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 200, 255, 0.4);
+            width: 100px;
+            text-align: center;
+        }
+        .speed-btn:hover {
+            background: rgba(0, 150, 255, 0.9);
+            transform: scale(1.05);
+        }
+        
+        /* Controles de cámara */
+        #look-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 40px);
+            grid-template-rows: repeat(3, 40px);
+            gap: 4px;
+            pointer-events: auto;
+            position: absolute;
+            right: 30px;
+            bottom: 30px;
+        }
+        .look-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            pointer-events: auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 200, 255, 0.4);
+        }
+        .look-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        #look-up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        #look-left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        #look-center {
+            grid-column: 2;
+            grid-row: 2;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+        }
+        #look-right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        #look-down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        
+        /* Información de rendimiento */
+        #performance-warning {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(200, 0, 0, 0.7);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            backdrop-filter: blur(5px);
+            display: none;
+            z-index: 100;
+        }
+        #optimization-info {
+            position: absolute;
+            bottom: 35px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            backdrop-filter: blur(5px);
+            z-index: 100;
+        }
+        
+        /* Información de estrella seleccionada */
+        #selected-star-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid #00ccff;
+            display: none;
+            z-index: 100;
+            pointer-events: none;
+            min-width: 220px;
+            max-width: 90%;
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
+        }
+        
+        /* Información de planeta seleccionado */
+        #selected-planet-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+            backdrop-filter: blur(10px);
+            border: 1px solid #00ccff;
+            display: none;
+            z-index: 110;
+            min-width: 250px;
+            max-width: 90%;
+            box-shadow: 0 0 25px rgba(0, 200, 255, 0.6);
+            pointer-events: auto;
+        }
+        #close-planet-info {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+        
+        .star-marker {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(0, 200, 255, 0.7);
+            border: 2px solid white;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 50;
+            display: none;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+            50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+        }
+        
+        /* Media queries para diferentes orientaciones */
+        @media (max-width: 768px) and (orientation: portrait) {
+            #info-panel {
+                max-width: 180px;
+                font-size: 11px;
+            }
+            #mode-toggle, .speed-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+            #speed-controls {
+                top: 45px;
+                right: 5px;
+            }
+            .speed-btn {
+                width: 90px;
+            }
+            .look-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 768px) and (orientation: landscape) {
+            #info-panel {
+                max-width: 160px;
+                font-size: 10px;
+                top: 5px;
+                left: 5px;
+            }
+            #mode-toggle {
+                top: 5px;
+                right: 5px;
+                padding: 5px 8px;
+                font-size: 10px;
+            }
+            #speed-controls {
+                top: 35px;
+                right: 5px;
+            }
+            .speed-btn {
+                padding: 5px 8px;
+                font-size: 10px;
+                width: 85px;
+            }
+            .look-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+            #optimization-info {
+                bottom: 25px;
+                left: 5px;
+            }
+        }
+
+        /* Texto powered by DEEPSEEK */
+        .powered-by {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+        
+        /* Joystick de movimiento */
+        #movement-joystick {
+            position: absolute;
+            left: 30px;
+            bottom: 30px;
+            width: 100px;
+            height: 100px;
+            pointer-events: auto;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .joystick-inner {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            transition: transform 0.1s;
+        }
+        .joystick-label {
+            position: absolute;
+            color: white;
+            text-align: center;
+            width: 100%;
+            bottom: -20px;
+            font-size: 11px;
+            text-shadow: 0 0 5px black;
+        }
+        
+        /* Controles de idioma */
+        #language-controls {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+            pointer-events: auto;
+        }
+        .lang-btn {
+            padding: 6px 12px;
+            background: rgba(0, 100, 200, 0.7);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            backdrop-filter: blur(5px);
+            font-size: 12px;
+            pointer-events: auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 200, 255, 0.4);
+        }
+        .lang-btn:hover {
+            background: rgba(0, 150, 255, 0.9);
+            transform: scale(1.05);
+        }
+        .lang-btn.active {
+            background: rgba(0, 200, 255, 0.9);
+            box-shadow: 0 0 12px rgba(0, 200, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <h2 class="title">GALAXY EXPLORER</h2>
+        <p class="loading-text">Generando galaxia optimizada</p>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div class="powered-by">powered by DEEPSEEK</div>
+    </div>
+
+    <div id="ui-container">
+        <!-- Controles de idioma -->
+        <div id="language-controls">
+            <button id="lang-es" class="lang-btn active">Español</button>
+            <button id="lang-en" class="lang-btn">English</button>
+        </div>
+        
+        <div id="info-panel">
+            <h3 id="location-name">Espacio Interestelar</h3>
+            <div id="location-desc">Navegando entre sistemas estelares</div>
+            <div class="planet-info">
+                <span id="mode-label">Modo:</span> <span id="view-mode">Orbital</span><br>
+                <span id="scale-label">Escala:</span> <span id="scale-value">1.0</span><br>
+                <span id="distance-label">Distancia:</span> <span id="distance-value">0 AL</span><br>
+                <span id="speed-label">Velocidad:</span> <span id="speed-value">1.0x</span><br>
+                <span id="orbit-speed-label">Vel. Órbitas:</span> <span id="orbit-speed-value">1.0x</span>
+            </div>
+        </div>
+        
+        <button id="mode-toggle"><span id="mode-toggle-text">Modo:</span> <span id="mode-toggle-value">Orbital</span></button>
+        
+        <!-- Controles de velocidad en la parte superior derecha -->
+        <div id="speed-controls">
+            <button class="speed-btn" id="player-speed-btn"><span id="speed-label-btn">Vel:</span> 1x</button>
+            <button class="speed-btn" id="orbit-speed-btn"><span id="orbit-speed-label-btn">Órbita:</span> 1x</button>
+            <button class="speed-btn" id="pause-btn"><span id="pause-label">Pausa</span></button>
+        </div>
+        
+        <!-- Joystick con elemento visual añadido -->
+        <div id="movement-joystick">
+            <div class="joystick-inner"></div>
+            <div class="joystick-label" id="movement-label">Movimiento</div>
+        </div>
+        
+        <!-- Controles de cámara -->
+        <div id="look-controls">
+            <button class="look-btn" id="look-up">▲</button>
+            <button class="look-btn" id="look-left">◀</button>
+            <button class="look-btn" id="look-center">⊙</button>
+            <button class="look-btn" id="look-right">▶</button>
+            <button class="look-btn" id="look-down">▼</button>
+        </div>
+        
+        <div id="performance-warning">
+            <span id="performance-warning-text">Modo de rendimiento bajo activado</span>
+        </div>
+        
+        <div id="optimization-info">
+            <span id="stars-label">Estrellas:</span> <span id="star-count">0</span> | <span id="fps-label">FPS:</span> <span id="fps-counter">0</span>
+        </div>
+        
+        <div id="selected-star-info">
+            <h3 id="selected-star-name">Nombre de Estrella</h3>
+            <p id="selected-star-distance">Distancia: 0 AL</p>
+            <p id="selected-star-type">Tipo: Desconocido</p>
+            <p id="selected-star-planets">Planetas: 0</p>
+            <button id="set-target-btn" style="margin-top: 8px; padding: 5px 10px; background: #ff3366; border: none; border-radius: 5px; color: white; pointer-events: auto;"><span id="set-target-text">Establecer como objetivo</span></button>
+        </div>
+        
+        <div id="selected-planet-info">
+            <button id="close-planet-info">×</button>
+            <h3 id="selected-planet-name">Nombre Planeta</h3>
+            <p id="selected-planet-type">Tipo: Terrestre</p>
+            <p id="selected-planet-radius">Radio: 6,371 km</p>
+            <p id="selected-planet-day">Duración del día: 24 horas</p>
+            <p id="selected-planet-temp">Temperatura: 15°C</p>
+            <p id="selected-planet-desc">Descripción: Planeta con condiciones habitables.</p>
+        </div>
+        
+        <div id="star-marker" class="star-marker"></div>
+        <div id="target-indicator"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Variables globales optimizadas
+        let scene, camera, renderer;
+        let stars = {};
+        let planets = []; // Array para almacenar todos los planetas
+        let nebulae = [];
+        let currentScale = 1.0;
+        let viewMode = 'orbital';
+        let currentStar = null;
+        let playerSpeed = 1.0;
+        let orbitSpeed = 1.0;
+        let isPaused = false;
+        let moveDirection = { x: 0, y: 0, z: 0 };
+        let lookActive = { up: false, down: false, left: false, right: false };
+        let performanceMode = 'high';
+        let currentSeed = Math.floor(Math.random() * 1000000);
+        let frameCount = 0;
+        let lastFpsUpdate = 0;
+        let fps = 0;
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+        let selectedStar = null;
+        let selectedPlanet = null;
+        let lastTime = 0;
+        let joystickInner;
+        let targetStar = null;
+        let starVisibilityFactor = 1.0;
+        let blackHole = null;
+        let blackHoleCluster = [];
+        let currentLanguage = 'es'; // Idioma actual
+        let orbitUpdateInterval;
+        
+        // Constantes optimizadas para rendimiento
+        const LIGHT_YEAR = 1;
+        const GALAXY_SIZE = 50000 * LIGHT_YEAR;
+        const STAR_COUNT = 200;
+        const MIN_PLANETS = 1; // Mínimo 1 planeta
+        const MAX_PLANETS = 3; // Máximo 3 planetas
+        const MIN_STAR_DISTANCE = 10 * LIGHT_YEAR;
+        
+        // Colores de estrellas por tipo - más variedad
+        const STAR_COLORS = {
+            O: 0x9bb0ff,    // Azul muy claro
+            B: 0xaabfff,    // Azul claro
+            A: 0xcad7ff,    // Blanco azulado
+            F: 0xf8f7ff,    // Blanco
+            G: 0xfff4ea,    // Blanco amarillento
+            K: 0xffd2a1,    // Naranja claro
+            M: 0xffcc6f,    // Naranja
+            R: 0xff6b6b,    // Rojo
+            S: 0xff3366,    // Rojo intenso
+            N: 0xffaa00     // Amarillo
+        };
+        
+        // Tipos de planetas y sus características
+        const PLANET_TYPES = {
+            terrestrial: {
+                name: "Terrestre",
+                name_en: "Terrestrial",
+                desc: "Planeta rocoso con superficie sólida. Puede tener condiciones para la vida.",
+                desc_en: "Rocky planet with solid surface. May have conditions for life.",
+                color: 0x4caf50,
+                radiusRange: [0.3, 1.5],
+                dayRange: [10, 50],
+                tempRange: [-50, 50]
+            },
+            gas_giant: {
+                name: "Gigante Gaseoso",
+                name_en: "Gas Giant",
+                desc: "Planeta masivo compuesto principalmente de hidrógeno y helio.",
+                desc_en: "Massive planet composed mainly of hydrogen and helium.",
+                color: 0xff9800,
+                radiusRange: [3, 12],
+                dayRange: [5, 20],
+                tempRange: [-180, -80]
+            },
+            ice_giant: {
+                name: "Gigante de Hielo",
+                name_en: "Ice Giant",
+                desc: "Planeta compuesto principalmente de elementos más pesados que el hidrógeno y helio.",
+                desc_en: "Planet composed mainly of elements heavier than hydrogen and helium.",
+                color: 0x03a9f4,
+                radiusRange: [2, 6],
+                dayRange: [10, 30],
+                tempRange: [-220, -150]
+            },
+            desert: {
+                name: "Desértico",
+                name_en: "Desert",
+                desc: "Planeta árido con poca o ninguna agua superficial.",
+                desc_en: "Arid planet with little or no surface water.",
+                color: 0xff5722,
+                radiusRange: [0.5, 1.2],
+                dayRange: [15, 80],
+                tempRange: [0, 80]
+            }
+        };
+        
+        // Colores de nebulosas
+        const NEBULA_COLORS = [
+            0xff6b6b, 0x4ecdc4, 0x45b7d1, 0x96ceb4, 0xca8eff, 0xff8fb1
+        ];
+        
+        // Textos traducibles
+        const translations = {
+            es: {
+                "location-name": "Espacio Interestelar",
+                "location-desc": "Navegando entre sistemas estelares",
+                "mode-label": "Modo:",
+                "scale-label": "Escala:",
+                "distance-label": "Distancia:",
+                "speed-label": "Velocidad:",
+                "orbit-speed-label": "Vel. Órbitas:",
+                "stars-label": "Estrellas:",
+                "fps-label": "FPS:",
+                "mode-toggle-text": "Modo:",
+                "mode-toggle-value": "Orbital",
+                "speed-label-btn": "Vel:",
+                "orbit-speed-label-btn": "Órbita:",
+                "pause-label": "Pausa",
+                "movement-label": "Movimiento",
+                "performance-warning-text": "Modo de rendimiento bajo activado",
+                "set-target-text": "Establecer como objetivo",
+                "resume": "Reanudar",
+                "orbital": "Orbital",
+                "surface": "Superficie",
+                "light-years": "AL",
+                "planet-type": "Tipo:",
+                "radius": "Radio:",
+                "day-length": "Duración del día:",
+                "temperature": "Temperatura:",
+                "description": "Descripción:",
+                "hours": "horas",
+                "planets": "Planetas:",
+                "unknown": "Desconocido"
+            },
+            en: {
+                "location-name": "Interstellar Space",
+                "location-desc": "Navigating between star systems",
+                "mode-label": "Mode:",
+                "scale-label": "Scale:",
+                "distance-label": "Distance:",
+                "speed-label": "Speed:",
+                "orbit-speed-label": "Orbit Speed:",
+                "stars-label": "Stars:",
+                "fps-label": "FPS:",
+                "mode-toggle-text": "Mode:",
+                "mode-toggle-value": "Orbital",
+                "speed-label-btn": "Speed:",
+                "orbit-speed-label-btn": "Orbit:",
+                "pause-label": "Pause",
+                "movement-label": "Movement",
+                "performance-warning-text": "Low performance mode enabled",
+                "set-target-text": "Set as target",
+                "resume": "Resume",
+                "orbital": "Orbital",
+                "surface": "Surface",
+                "light-years": "LY",
+                "planet-type": "Type:",
+                "radius": "Radius:",
+                "day-length": "Day length:",
+                "temperature": "Temperature:",
+                "description": "Description:",
+                "hours": "hours",
+                "planets": "Planets:",
+                "unknown": "Unknown"
+            }
+        };
+        
+        // Semilla para generación procedural
+        function seededRandom() {
+            const x = Math.sin(currentSeed++) * 10000;
+            return x - Math.floor(x);
+        }
+        
+        // Inicialización optimizada
+        function init() {
+            updateProgress(10);
+            
+            // Crear escena
+            scene = new THREE.Scene();
+            
+            // Crear cámara - Posición ajustada para ver estrellas
+            const aspectRatio = window.innerWidth / window.innerHeight;
+            camera = new THREE.PerspectiveCamera(75, aspectRatio, 1, 1000000 * LIGHT_YEAR);
+            camera.position.set(0, 5000 * LIGHT_YEAR, 10000 * LIGHT_YEAR);
+            camera.lookAt(0, 0, 0);
+            
+            updateProgress(30);
+            
+            // Crear renderizador con ajustes de rendimiento
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: false,
+                alpha: true,
+                powerPreference: 'high-performance'
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+            document.body.appendChild(renderer.domElement);
+            
+            // Configurar luces
+            const ambientLight = new THREE.AmbientLight(0x333333);
+            scene.add(ambientLight);
+            
+            // Añadir luz direccional para mejor iluminación
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(1, 1, 1).normalize();
+            scene.add(directionalLight);
+            
+            updateProgress(50);
+            
+            // Crear galaxia procedural con distribución mejorada
+            createGalaxy();
+            
+            // Crear agujero negro central con cúmulo de estrellas
+            createBlackHoleCluster();
+            
+            // Crear nebulosas con probabilidad (20% de probabilidad)
+            if (Math.random() < 0.2) {
+                const nebulaCount = Math.floor(Math.random() * 3) + 1; // 1-3 nebulosas
+                createNebulae(nebulaCount);
+            }
+            
+            updateProgress(70);
+            
+            // Configurar eventos y controles
+            setupEventListeners();
+            setupJoystick();
+            
+            updateProgress(100);
+            
+            // Obtener referencia al joystick interno
+            joystickInner = document.querySelector('.joystick-inner');
+            
+            // Iniciar la actualización continua de órbitas
+            startOrbitUpdates();
+            
+            // Ocultar pantalla de carga después de un breve delay
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                // Iniciar animación después de que todo esté cargado
+                animate();
+            }, 800);
+            
+            // Actualizar UI
+            updateUI();
+            document.getElementById('star-count').textContent = Object.keys(stars).length;
+        }
+        
+        // Iniciar actualización continua de órbitas
+        function startOrbitUpdates() {
+            // Actualizar órbitas independientemente del movimiento del jugador
+            orbitUpdateInterval = setInterval(() => {
+                if (!isPaused) {
+                    updateOrbits();
+                }
+            }, 16); // ~60 FPS
+        }
+        
+        // Detectar capacidades del dispositivo
+        function detectPerformance() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const memory = navigator.deviceMemory || 4;
+            
+            if (isMobile || memory < 4) {
+                performanceMode = 'low';
+                document.getElementById('performance-warning').style.display = 'block';
+            }
+        }
+        
+        function updateProgress(percent) {
+            document.getElementById('progress').style.width = percent + '%';
+        }
+        
+        // Crear nebulosas optimizadas
+        function createNebulae(count) {
+            for (let i = 0; i < count; i++) {
+                const angle = seededRandom() * Math.PI * 2;
+                const radius = 5000 + seededRandom() * (GALAXY_SIZE - 5000);
+                const height = (seededRandom() - 0.5) * GALAXY_SIZE / 20;
+                
+                const x = Math.cos(angle) * radius;
+                const y = height;
+                const z = Math.sin(angle) * radius;
+                
+                const size = 50 + seededRandom() * 150;
+                const color = NEBULA_COLORS[Math.floor(seededRandom() * NEBULA_COLORS.length)];
+                
+                const geometry = new THREE.SphereGeometry(size, 8, 6);
+                
+                const material = new THREE.MeshBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0.15,
+                    blending: THREE.AdditiveBlending,
+                    wireframe: false
+                });
+                
+                const nebula = new THREE.Mesh(geometry, material);
+                nebula.position.set(x, y, z);
+                
+                scene.add(nebula);
+                nebulae.push(nebula);
+            }
+        }
+        
+        // Crear agujero negro central con cúmulo de estrellas
+        function createBlackHoleCluster() {
+            // Crear el agujero negro
+            const blackHoleGeometry = new THREE.SphereGeometry(100, 32, 32);
+            
+            // Crear un material especial para el agujero negro
+            const blackHoleMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                emissive: 0x220022,
+                emissiveIntensity: 0.8,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            blackHole = new THREE.Mesh(blackHoleGeometry, blackHoleMaterial);
+            blackHole.position.set(0, 0, 0);
+            scene.add(blackHole);
+            
+            // Añadir disco de acreción
+            const accretionDiskGeometry = new THREE.RingGeometry(120, 300, 64);
+            const accretionDiskMaterial = new THREE.MeshBasicMaterial({
+                color: 0xff9900,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.7,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const accretionDisk = new THREE.Mesh(accretionDiskGeometry, accretionDiskMaterial);
+            accretionDisk.rotation.x = Math.PI / 2;
+            accretionDisk.position.set(0, 0, 0);
+            scene.add(accretionDisk);
+            
+            // Crear 10 estrellas orbitando alrededor del agujero negro
+            for (let i = 0; i < 10; i++) {
+                const angle = (i / 10) * Math.PI * 2;
+                const distance = 500 + (i * 100);
+                
+                const x = Math.cos(angle) * distance;
+                const z = Math.sin(angle) * distance;
+                
+                // Estrellas más brillantes cerca del agujero negro
+                const starRadius = 5 + (i * 0.5);
+                const starGeometry = new THREE.SphereGeometry(starRadius, 16, 16);
+                const starMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xffffff,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 3.0
+                });
+                
+                const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+                starMesh.position.set(x, 0, z);
+                
+                // Añadir punto de luz
+                const starLight = new THREE.PointLight(0xffffff, 2.0, 1000);
+                starLight.position.set(x, 0, z);
+                
+                scene.add(starMesh);
+                scene.add(starLight);
+                
+                // Almacenar datos de la estrella del cúmulo
+                const name = `BH-${i+1}`;
+                stars[name] = {
+                    mesh: starMesh,
+                    light: starLight,
+                    radius: starRadius,
+                    name: name,
+                    type: 'S', // Especial para estrellas del cúmulo
+                    distance: distance,
+                    position: new THREE.Vector3(x, 0, z),
+                    planets: [],
+                    orbitRadius: distance,
+                    orbitSpeed: 0.001 * (10 - i),
+                    orbitAngle: angle
+                };
+                
+                blackHoleCluster.push(stars[name]);
+            }
+        }
+        
+        // Generar un planeta con características únicas
+        function generatePlanet(star, index, starRadius) {
+            // Distancia orbital basada en el índice del planeta y el radio de la estrella
+            // Asegurar que los planetas no estén dentro de la estrella ni demasiado lejos
+            const baseOrbitDistance = starRadius * 10; // Distancia base desde la estrella
+            const orbitDistance = baseOrbitDistance * (index + 1) * (1 + seededRandom() * 0.5);
+            
+            // Seleccionar tipo de planeta aleatoriamente
+            const planetTypes = Object.keys(PLANET_TYPES);
+            const planetType = planetTypes[Math.floor(seededRandom() * planetTypes.length)];
+            const planetInfo = PLANET_TYPES[planetType];
+            
+            // Generar características del planeta
+            const planetSize = starRadius * (0.1 + seededRandom() * 0.3) * (planetInfo.radiusRange[0] + 
+                              seededRandom() * (planetInfo.radiusRange[1] - planetInfo.radiusRange[0]));
+            
+            const planetSpeed = 0.005 / (index + 1); // Velocidad orbital más lenta para planetas exteriores
+            const planetAngle = seededRandom() * Math.PI * 2;
+            
+            // Generar datos adicionales
+            const planetDay = planetInfo.dayRange[0] + seededRandom() * (planetInfo.dayRange[1] - planetInfo.dayRange[0]);
+            const planetTemp = planetInfo.tempRange[0] + seededRandom() * (planetInfo.tempRange[1] - planetInfo.tempRange[0]);
+            
+            // Malla para planeta
+            const planetGeometry = new THREE.SphereGeometry(planetSize, 8, 6); // Reducida la calidad para mejor rendimiento
+            const planetMaterial = new THREE.MeshLambertMaterial({ 
+                color: planetInfo.color,
+                emissive: planetInfo.color,
+                emissiveIntensity: 0.1
+            });
+            
+            const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
+            
+            // Posicionar el planeta a la distancia correcta de la estrella
+            planetMesh.position.set(
+                star.position.x + Math.cos(planetAngle) * orbitDistance,
+                star.position.y + (seededRandom() - 0.5) * 0.0001,
+                star.position.z + Math.sin(planetAngle) * orbitDistance
+            );
+            
+            scene.add(planetMesh);
+            
+            // Crear objeto planeta con toda su información
+            const planetData = {
+                mesh: planetMesh,
+                orbitRadius: orbitDistance,
+                angle: planetAngle,
+                speed: planetSpeed,
+                name: `Planeta ${index + 1}`,
+                name_en: `Planet ${index + 1}`,
+                type: planetType,
+                radius: planetSize,
+                dayLength: planetDay,
+                temperature: planetTemp,
+                description: planetInfo.desc,
+                description_en: planetInfo.desc_en,
+                star: star.name
+            };
+            
+            // Añadir a la lista global de planetas
+            planets.push(planetData);
+            
+            return planetData;
+        }
+        
+        // Crear galaxia optimizada
+        function createGalaxy() {
+            const placedPositions = [];
+            
+            // Tipos de estrellas con más variedad
+            const starTypes = ['O', 'B', 'A', 'F', 'G', 'K', 'M', 'R', 'S', 'N'];
+            
+            for (let i = 0; i < STAR_COUNT; i++) {
+                let attempts = 0;
+                let validPosition = false;
+                let x, y, z;
+                
+                while (!validPosition && attempts < 50) {
+                    const angle = seededRandom() * Math.PI * 2;
+                    const galacticRadius = 1000 + seededRandom() * (GALAXY_SIZE - 1000);
+                    const height = (seededRandom() - 0.5) * GALAXY_SIZE / 15;
+                    
+                    x = Math.cos(angle) * galacticRadius;
+                    y = height;
+                    z = Math.sin(angle) * galacticRadius;
+                    
+                    // Evitar colisión con el cúmulo central
+                    const distanceToCenter = Math.sqrt(x*x + y*y + z*z);
+                    if (distanceToCenter < 2000) {
+                        attempts++;
+                        continue;
+                    }
+                    
+                    validPosition = true;
+                    for (const pos of placedPositions) {
+                        const distance = Math.sqrt(
+                            Math.pow(x - pos.x, 2) + 
+                            Math.pow(y - pos.y, 2) + 
+                            Math.pow(z - pos.z, 2)
+                        );
+                        
+                        if (distance < MIN_STAR_DISTANCE) {
+                            validPosition = false;
+                            break;
+                        }
+                    }
+                    
+                    attempts++;
+                }
+                
+                if (!validPosition) continue;
+                
+                placedPositions.push({x, y, z});
+                
+                // Distribución más realista de tipos de estrellas
+                const typeIndex = Math.floor(Math.pow(seededRandom(), 1.5) * starTypes.length);
+                const starType = starTypes[typeIndex];
+                const starColor = STAR_COLORS[starType];
+                
+                // Aumentar el tamaño de las estrellas para que sean visibles desde lejos
+                const sizeFactors = { 
+                    O: 2.0, B: 1.5, A: 1.2, F: 1.0, G: 0.8, K: 0.6, M: 0.5, R: 0.7, S: 0.9, N: 1.1 
+                };
+                const starRadius = (sizeFactors[starType] || 1.0) * (0.9 + seededRandom() * 0.2) * 15;
+                
+                const name = `HIP ${Math.floor(10000 + seededRandom() * 90000)}`;
+                
+                // Crear malla para estrella - más brillante
+                const starGeometry = new THREE.SphereGeometry(starRadius, 12, 10);
+                const starMaterial = new THREE.MeshBasicMaterial({
+                    color: starColor,
+                    emissive: starColor,
+                    emissiveIntensity: 4.0,
+                    transparent: true
+                });
+                
+                const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+                starMesh.position.set(x, y, z);
+                starMesh.frustumCulled = false; // Evitar que desaparezcan
+                
+                // Añadir punto de luz para hacerla más visible
+                const starLight = new THREE.PointLight(starColor, 2.5, 5000 * LIGHT_YEAR, 1.5);
+                starLight.position.set(x, y, z);
+                scene.add(starLight);
+                
+                scene.add(starMesh);
+                
+                // Generar sistema planetario aleatorio (30% de probabilidad)
+                const planetCount = Math.floor(seededRandom() * (MAX_PLANETS - MIN_PLANETS + 1)) + MIN_PLANETS;
+                const starPlanets = [];
+                
+                // 30% de probabilidad de generar planetas
+                if (seededRandom() < 0.3) {
+                    for (let p = 0; p < planetCount; p++) {
+                        // Generar el planeta
+                        const planet = generatePlanet({position: {x, y, z}, name, radius: starRadius}, p, starRadius);
+                        starPlanets.push(planet);
+                    }
+                }
+                
+                // Almacenar datos de la estrella
+                stars[name] = {
+                    mesh: starMesh,
+                    light: starLight,
+                    radius: starRadius,
+                    name: name,
+                    type: starType,
+                    distance: Math.sqrt(x*x + y*y + z*z),
+                    position: new THREE.Vector3(x, y, z),
+                    planets: starPlanets
+                };
+            }
+        }
+        
+        // Configurar joystick de movimiento
+        function setupJoystick() {
+            // Implementación básica de joystick virtual
+            const joystickArea = document.getElementById('movement-joystick');
+            let isTouching = false;
+            let touchId = null;
+            let startX = 0, startY = 0;
+            
+            joystickArea.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (isTouching) return;
+                
+                isTouching = true;
+                touchId = e.changedTouches[0].identifier;
+                const touch = e.changedTouches[0];
+                const rect = joystickArea.getBoundingClientRect();
+                
+                startX = rect.width / 2;
+                startY = rect.height / 2;
+            });
+            
+            joystickArea.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isTouching) return;
+                
+                // Encontrar el touch correcto
+                let touch = null;
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === touchId) {
+                        touch = e.changedTouches[i];
+                        break;
+                    }
+                }
+                
+                if (!touch) return;
+                
+                const rect = joystickArea.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                
+                // Calcular dirección y fuerza
+                const dx = (x - startX) / (rect.width / 2);
+                const dy = (y - startY) / (rect.height / 2);
+                
+                // Limitar a círculo
+                const distance = Math.min(1, Math.sqrt(dx * dx + dy * dy));
+                const angle = Math.atan2(dy, dx);
+                
+                moveDirection.x = -Math.cos(angle) * distance;
+                moveDirection.z = -Math.sin(angle) * distance;
+                
+                // Actualizar posición visual del joystick interno
+                if (joystickInner) {
+                    const maxMovement = 25;
+                    joystickInner.style.transform = `translate(${dx * maxMovement}px, ${dy * maxMovement}px)`;
+                }
+            });
+            
+            joystickArea.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                if (!isTouching) return;
+                
+                // Verificar si es el touch correcto
+                let isCorrectTouch = false;
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === touchId) {
+                        isCorrectTouch = true;
+                        break;
+                    }
+                }
+                
+                if (isCorrectTouch) {
+                    isTouching = false;
+                    moveDirection.x = 0;
+                    moveDirection.z = 0;
+                    
+                    // Resetear posición visual del joystick
+                    if (joystickInner) {
+                        joystickInner.style.transform = 'translate(0, 0)';
+                    }
+                }
+            });
+            
+            joystickArea.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                isTouching = false;
+                moveDirection.x = 0;
+                moveDirection.z = 0;
+                
+                // Resetear posición visual del joystick
+                if (joystickInner) {
+                    joystickInner.style.transform = 'translate(0, 0)';
+                }
+            });
+        }
+        
+        // Actualizar órbitas de planetas y estrellas
+        function updateOrbits() {
+            const cameraPos = camera.position;
+            
+            for (const starName in stars) {
+                const star = stars[starName];
+                const distanceToStar = cameraPos.distanceTo(star.position);
+                
+                // Solo actualizar estrellas cercanas (optimización)
+                if (distanceToStar > 5000 * LIGHT_YEAR) continue;
+                
+                // Mover planetas
+                for (const planet of star.planets) {
+                    planet.angle += planet.speed * orbitSpeed;
+                    
+                    const newX = star.position.x + Math.cos(planet.angle) * planet.orbitRadius;
+                    const newZ = star.position.z + Math.sin(planet.angle) * planet.orbitRadius;
+                    
+                    if (planet.mesh) {
+                        planet.mesh.position.setX(newX);
+                        planet.mesh.position.setZ(newZ);
+                        planet.mesh.rotation.y += 0.01 * orbitSpeed;
+                    }
+                }
+                
+                // Mover estrellas del cúmulo del agujero negro
+                if (star.orbitRadius) {
+                    star.orbitAngle += star.orbitSpeed * orbitSpeed;
+                    const newX = Math.cos(star.orbitAngle) * star.orbitRadius;
+                    const newZ = Math.sin(star.orbitAngle) * star.orbitRadius;
+                    
+                    star.mesh.position.setX(newX);
+                    star.mesh.position.setZ(newZ);
+                    if (star.light) {
+                        star.light.position.setX(newX);
+                        star.light.position.setZ(newZ);
+                    }
+                }
+            }
+        }
+        
+        // Configurar eventos táctiles
+        function setupEventListeners() {
+            // Botones de mirada
+            const lookButtons = ['look-up', 'look-down', 'look-left', 'look-right'];
+            
+            lookButtons.forEach(id => {
+                const button = document.getElementById(id);
+                button.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    lookActive[id.split('-')[1]] = true;
+                });
+                button.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    lookActive[id.split('-')[1]] = false;
+                });
+                button.addEventListener('touchcancel', (e) => {
+                    e.preventDefault();
+                    lookActive[id.split('-')[1]] = false;
+                });
+                button.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    lookActive[id.split('-')[1]] = true;
+                });
+                button.addEventListener('mouseup', (e) => {
+                    e.preventDefault();
+                    lookActive[id.split('-')[1]] = false;
+                });
+                button.addEventListener('mouseleave', (e) => {
+                    e.preventDefault();
+                    lookActive[id.split('-')[1]] = false;
+                });
+            });
+            
+            document.getElementById('look-center').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (currentStar) {
+                    camera.lookAt(currentStar.position);
+                } else {
+                    camera.lookAt(0, 0, 0);
+                }
+            });
+            
+            document.getElementById('look-center').addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                if (currentStar) {
+                    camera.lookAt(currentStar.position);
+                } else {
+                    camera.lookAt(0, 0, 0);
+                }
+            });
+            
+            // Botones de control
+            document.getElementById('mode-toggle').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (viewMode === 'orbital') {
+                    switchToOrbitalMode();
+                }
+            });
+            
+            // Controles de velocidad
+            document.getElementById('player-speed-btn').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const speeds = [0.01, 0.1, 0.5, 1, 5, 10, 50, 100, 500, 1000, 5000, 10000];
+                const currentIndex = speeds.indexOf(playerSpeed);
+                playerSpeed = speeds[(currentIndex + 1) % speeds.length];
+                updateSpeedButtons();
+                updateUI();
+            });
+            
+            document.getElementById('orbit-speed-btn').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const speeds = [0, 0.01, 0.1, 0.5, 1, 2, 5, 10];
+                const currentIndex = speeds.indexOf(orbitSpeed);
+                orbitSpeed = speeds[(currentIndex + 1) % speeds.length];
+                updateSpeedButtons();
+                updateUI();
+            });
+            
+            document.getElementById('pause-btn').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isPaused = !isPaused;
+                updatePauseButton();
+                updateUI();
+            });
+            
+            // Evento para seleccionar estrellas y planetas al tocar
+            renderer.domElement.addEventListener('touchstart', handleSelection, { passive: true });
+            renderer.domElement.addEventListener('mousedown', handleSelection);
+            
+            // Botón para establecer objetivo
+            document.getElementById('set-target-btn').addEventListener('click', setTargetStar);
+            
+            // Botón para cerrar información del planeta
+            document.getElementById('close-planet-info').addEventListener('click', closePlanetInfo);
+            
+            // Ajustar tamaño al cambiar orientación
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            // Botones de idioma
+            document.getElementById('lang-es').addEventListener('click', () => setLanguage('es'));
+            document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+        }
+        
+        // Manejar selección de estrellas y planetas
+        function handleSelection(event) {
+            let clientX, clientY;
+            
+            if (event.touches) {
+                if (event.touches.length !== 1) return;
+                clientX = event.touches[0].clientX;
+                clientY = event.touches[0].clientY;
+            } else {
+                clientX = event.clientX;
+                clientY = event.clientY;
+            }
+            
+            const rect = renderer.domElement.getBoundingClientRect();
+            
+            mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+            
+            // Usar raycaster para detectar estrellas y planetas
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Primero verificar si se hizo clic en un planeta
+            let closestPlanet = null;
+            let closestDistance = Infinity;
+            
+            for (const planet of planets) {
+                const planetPosition = planet.mesh.position;
+                const distance = camera.position.distanceTo(planetPosition);
+                
+                // Solo considerar planetas dentro de un rango razonable
+                if (distance < 5000 * LIGHT_YEAR) {
+                    const screenPosition = new THREE.Vector3();
+                    screenPosition.copy(planetPosition);
+                    screenPosition.project(camera);
+                    
+                    // Calcular la distancia en pantalla
+                    const dx = mouse.x - screenPosition.x;
+                    const dy = mouse.y - screenPosition.y;
+                    const screenDistance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (screenDistance < 0.1 && screenDistance < closestDistance) {
+                        closestDistance = screenDistance;
+                        closestPlanet = planet;
+                    }
+                }
+            }
+            
+            if (closestPlanet) {
+                selectPlanet(closestPlanet);
+                return;
+            }
+            
+            // Si no se seleccionó un planeta, buscar estrellas
+            let closestStar = null;
+            closestDistance = Infinity;
+            
+            for (const starName in stars) {
+                const star = stars[starName];
+                const starPosition = star.position;
+                const distance = camera.position.distanceTo(starPosition);
+                
+                // Solo considerar estrellas dentro de un rango razonable
+                if (distance < 50000 * LIGHT_YEAR) {
+                    const screenPosition = new THREE.Vector3();
+                    screenPosition.copy(starPosition);
+                    screenPosition.project(camera);
+                    
+                    // Calcular la distancia en pantalla
+                    const dx = mouse.x - screenPosition.x;
+                    const dy = mouse.y - screenPosition.y;
+                    const screenDistance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (screenDistance < 0.1 && screenDistance < closestDistance) {
+                        closestDistance = screenDistance;
+                        closestStar = star;
+                    }
+                }
+            }
+            
+            if (closestStar) {
+                selectStar(closestStar);
+            } else {
+                // Si no se seleccionó nada, ocultar la información
+                document.getElementById('selected-star-info').style.display = 'none';
+                document.getElementById('star-marker').style.display = 'none';
+                selectedStar = null;
+            }
+        }
+        
+        // Función para seleccionar una estrella
+        function selectStar(star) {
+            selectedStar = star;
+            
+            // Actualizar información de la estrella seleccionada
+            document.getElementById('selected-star-name').textContent = star.name;
+            document.getElementById('selected-star-distance').textContent = `${currentLanguage === 'es' ? 'Distancia:' : 'Distance:'} ${Math.round(star.distance)} ${currentLanguage === 'es' ? 'AL' : 'LY'}`;
+            document.getElementById('selected-star-type').textContent = `${currentLanguage === 'es' ? 'Tipo:' : 'Type:'} ${star.type}`;
+            document.getElementById('selected-star-planets').textContent = `${currentLanguage === 'es' ? 'Planetas:' : 'Planets:'} ${star.planets.length}`;
+            
+            // Mostrar información
+            document.getElementById('selected-star-info').style.display = 'block';
+            
+            // Mostrar marcador en la estrella
+            const marker = document.getElementById('star-marker');
+            marker.style.display = 'block';
+            
+            // Actualizar posición del marcador
+            function updateMarkerPosition() {
+                if (!selectedStar) return;
+                
+                const vector = new THREE.Vector3();
+                vector.setFromMatrixPosition(selectedStar.mesh.matrixWorld);
+                vector.project(camera);
+                
+                const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (-(vector.y * 0.5 + 0.5)) * window.innerHeight;
+                
+                marker.style.left = `${x}px`;
+                marker.style.top = `${y}px`;
+                
+                requestAnimationFrame(updateMarkerPosition);
+            }
+            
+            updateMarkerPosition();
+        }
+        
+        // Función para seleccionar un planeta
+        function selectPlanet(planet) {
+            selectedPlanet = planet;
+            
+            // Actualizar información del planeta seleccionado
+            document.getElementById('selected-planet-name').textContent = currentLanguage === 'es' ? planet.name : planet.name_en;
+            document.getElementById('selected-planet-type').textContent = `${currentLanguage === 'es' ? 'Tipo:' : 'Type:'} ${currentLanguage === 'es' ? PLANET_TYPES[planet.type].name : PLANET_TYPES[planet.type].name_en}`;
+            document.getElementById('selected-planet-radius').textContent = `${currentLanguage === 'es' ? 'Radio:' : 'Radius:'} ${planet.radius.toFixed(2)} u`;
+            document.getElementById('selected-planet-day').textContent = `${currentLanguage === 'es' ? 'Duración del día:' : 'Day length:'} ${planet.dayLength.toFixed(1)} ${currentLanguage === 'es' ? 'horas' : 'hours'}`;
+            document.getElementById('selected-planet-temp').textContent = `${currentLanguage === 'es' ? 'Temperatura:' : 'Temperature:'} ${planet.temperature.toFixed(1)}°C`;
+            document.getElementById('selected-planet-desc').textContent = `${currentLanguage === 'es' ? 'Descripción:' : 'Description:'} ${currentLanguage === 'es' ? planet.description : planet.description_en}`;
+            
+            // Mostrar información
+            document.getElementById('selected-planet-info').style.display = 'block';
+        }
+        
+        // Cerrar información del planeta
+        function closePlanetInfo() {
+            document.getElementById('selected-planet-info').style.display = 'none';
+            selectedPlanet = null;
+        }
+        
+        // Establecer estrella como objetivo
+        function setTargetStar() {
+            if (selectedStar) {
+                targetStar = selectedStar;
+                
+                // Mostrar indicador de objetivo
+                const indicator = document.getElementById('target-indicator');
+                indicator.style.display = 'block';
+                
+                // Actualizar posición del indicador
+                function updateTargetIndicator() {
+                    if (!targetStar) {
+                        indicator.style.display = 'none';
+                        return;
+                    }
+                    
+                    const vector = new THREE.Vector3();
+                    vector.setFromMatrixPosition(targetStar.mesh.matrixWorld);
+                    vector.project(camera);
+                    
+                    const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                    const y = (-(vector.y * 0.5 + 0.5)) * window.innerHeight;
+                    
+                    // Solo mostrar si está en pantalla
+                    if (x >= 0 && x <= window.innerWidth && y >= 0 && y <= window.innerHeight) {
+                        indicator.style.display = 'block';
+                        indicator.style.left = `${x}px`;
+                        indicator.style.top = `${y}px`;
+                    } else {
+                        indicator.style.display = 'none';
+                    }
+                    
+                    requestAnimationFrame(updateTargetIndicator);
+                }
+                
+                updateTargetIndicator();
+                
+                // Ocultar información después de establecer objetivo
+                document.getElementById('selected-star-info').style.display = 'none';
+            }
+        }
+        
+        // Cambiar a modo orbital
+        function switchToOrbitalMode() {
+            viewMode = 'orbital';
+            currentScale = 1.0;
+            
+            updateModeToggle();
+            updateUI();
+        }
+        
+        // Actualizar escala de la cámara
+        function updateCameraScale() {
+            if (viewMode === 'surface') {
+                camera.near = 0.0000001 * currentScale;
+                camera.far = 1000000;
+            } else {
+                camera.near = 0.1 * currentScale;
+                camera.far = 1000000 * currentScale;
+            }
+            camera.updateProjectionMatrix();
+            updateUI();
+        }
+        
+        // Actualizar interfaz de usuario
+        function updateUI() {
+            let distanceText = "";
+            
+            if (viewMode === 'orbital') {
+                distanceText = Math.round(camera.position.length()) + (currentLanguage === 'es' ? " AL" : " LY");
+            } else {
+                distanceText = currentLanguage === 'es' ? "Superficie" : "Surface";
+            }
+            
+            document.getElementById('scale-value').textContent = currentScale.toExponential(2);
+            document.getElementById('distance-value').textContent = distanceText;
+            document.getElementById('speed-value').textContent = playerSpeed.toFixed(1) + "x";
+            document.getElementById('orbit-speed-value').textContent = orbitSpeed.toFixed(1) + "x";
+        }
+        
+        // Actualizar contador FPS
+        function updateFPS() {
+            frameCount++;
+            const now = performance.now();
+            
+            if (now >= lastFpsUpdate + 1000) {
+                fps = Math.round((frameCount * 1000) / (now - lastFpsUpdate));
+                frameCount = 0;
+                lastFpsUpdate = now;
+                
+                document.getElementById('fps-counter').textContent = fps;
+            }
+        }
+        
+        // Ajustar visibilidad de estrellas según la distancia
+        function updateStarVisibility() {
+            const cameraPos = camera.position;
+            
+            for (const starName in stars) {
+                const star = stars[starName];
+                const distanceToStar = cameraPos.distanceTo(star.position);
+                
+                // Ajustar la visibilidad según la distancia
+                const visibility = Math.min(1, 10000 / distanceToStar);
+                star.mesh.material.opacity = visibility;
+                star.mesh.scale.set(visibility, visibility, visibility);
+                
+                // Ajustar la intensidad de la luz
+                if (star.light) {
+                    star.light.intensity = Math.min(2.5, 25000 / distanceToStar);
+                }
+            }
+        }
+        
+        // Configurar sistema de idiomas
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Actualizar botones de idioma
+            document.getElementById('lang-es').classList.toggle('active', lang === 'es');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            
+            // Actualizar todos los textos de la interfaz
+            for (const key in translations[lang]) {
+                const elements = document.querySelectorAll(`[id="${key}"]`);
+                elements.forEach(el => {
+                    if (el.textContent.includes(translations[lang][key]) === false) {
+                        el.textContent = translations[lang][key];
+                    }
+                });
+            }
+            
+            // Actualizar botones de velocidad
+            updateSpeedButtons();
+            updatePauseButton();
+            updateModeToggle();
+            
+            // Actualizar información de estrella seleccionada si está visible
+            if (selectedStar) {
+                selectStar(selectedStar);
+            }
+            
+            // Actualizar información de planeta seleccionado si está visible
+            if (selectedPlanet) {
+                selectPlanet(selectedPlanet);
+            }
+            
+            // Actualizar UI
+            updateUI();
+        }
+        
+        // Actualizar textos de botones de velocidad
+        function updateSpeedButtons() {
+            document.getElementById('player-speed-btn').textContent = `${currentLanguage === 'es' ? 'Vel:' : 'Speed:'} ${playerSpeed}x`;
+            document.getElementById('orbit-speed-btn').textContent = `${currentLanguage === 'es' ? 'Órbita:' : 'Orbit:'} ${orbitSpeed}x`;
+        }
+        
+        // Actualizar texto de botón de pausa
+        function updatePauseButton() {
+            document.getElementById('pause-btn').textContent = isPaused ? 
+                (currentLanguage === 'es' ? 'Reanudar' : 'Resume') : 
+                (currentLanguage === 'es' ? 'Pausa' : 'Pause');
+        }
+        
+        // Actualizar texto de botón de modo
+        function updateModeToggle() {
+            document.getElementById('mode-toggle-value').textContent = 
+                viewMode === 'orbital' ? 
+                (currentLanguage === 'es' ? 'Orbital' : 'Orbital') : 
+                (currentLanguage === 'es' ? 'Superficie' : 'Surface');
+        }
+        
+        // Animación optimizada
+        function animate(time) {
+            requestAnimationFrame(animate);
+            
+            // Control de FPS para mejorar rendimiento
+            const delta = time - lastTime;
+            lastTime = time;
+            
+            if (delta < 1000 / 20) {
+                return;
+            }
+            
+            // Actualizar FPS siempre
+            updateFPS();
+            
+            // Aplicar movimiento de mirada siempre (incluso en pausa)
+            if (lookActive.up) camera.rotation.x -= 0.03;
+            if (lookActive.down) camera.rotation.x += 0.03;
+            if (lookActive.left) camera.rotation.y -= 0.03;
+            if (lookActive.right) camera.rotation.y += 0.03;
+            
+            if (!isPaused) {
+                // Aplicar movimiento con velocidad adecuada
+                const moveSpeed = (viewMode === 'surface') ? 1e-9 * playerSpeed * currentScale : playerSpeed * currentScale;
+                
+                const forward = new THREE.Vector3();
+                const right = new THREE.Vector3();
+                camera.getWorldDirection(forward);
+                right.crossVectors(new THREE.Vector3(0, 1, 0), forward).normalize();
+                
+                const moveVector = new THREE.Vector3();
+                moveVector.addScaledVector(forward, -moveDirection.z * moveSpeed);
+                moveVector.addScaledVector(right, -moveDirection.x * moveSpeed);
+                
+                camera.position.add(moveVector);
+                
+                // Actualizar visibilidad de estrellas
+                updateStarVisibility();
+                
+                // Si hay un objetivo, mirar hacia él automáticamente a alta velocidad
+                if (targetStar && playerSpeed >= 1000) {
+                    camera.lookAt(targetStar.position);
+                }
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Iniciar la aplicación
+        init();
+    </script>
+</body>
+</html>
