@@ -1,4 +1,7 @@
 # GALAXY-EXPLORER-V1
+important note:  To test this simulator, download it and open it in your browser. I tried to upload it as a web page but I couldn't, sorry. 
+
+
 This is my first project, inspired by the world's largest space exploration engine, SPACE ENGINE, but now it comes to mobile devices, you don't have to download anything, just try it and that's it.This is the first version of Galaxy Explorer, there are some bugs so I need some time to fix them, this project is made 100% with Deepseek AI
 **MANDATORY READING**
 There is a bug in the game controls, if you want to move forward you have to drag the joystick down, if you want to move backward, drag the joystick up, if you want to move To move right, drag the joystick to the left, and if you want to move left, drag the joystick to the right.
