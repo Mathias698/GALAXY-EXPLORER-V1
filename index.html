@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -35,7 +35,6 @@
             height: 100%;
             pointer-events: none;
         }
-        
         /* Panel de información */
         #info-panel {
             position: absolute;
@@ -72,7 +71,6 @@
             background: rgba(0, 150, 255, 0.9);
             transform: scale(1.05);
         }
-        
         /* Loading screen */
         #loading {
             position: fixed;
@@ -107,7 +105,6 @@
             font-size: 11px;
             color: #aaa;
         }
-        
         /* Controles de velocidad en la parte superior derecha */
         #speed-controls {
             position: absolute;
@@ -119,7 +116,6 @@
             z-index: 90;
             pointer-events: auto;
         }
-        
         .speed-btn {
             padding: 6px 10px;
             background: rgba(0, 100, 200, 0.7);
@@ -138,7 +134,6 @@
             background: rgba(0, 150, 255, 0.9);
             transform: scale(1.05);
         }
-        
         /* Controles de cámara */
         #look-controls {
             display: grid;
@@ -154,8 +149,9 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
+            /* Color metálico real */
+            background: radial-gradient(ellipse at center, #c0c0c0 0%, #8c8c8c 100%);
+            border: 1px solid #555;
             color: white;
             font-size: 16px;
             display: flex;
@@ -165,9 +161,10 @@
             pointer-events: auto;
             transition: all 0.3s ease;
             box-shadow: 0 0 8px rgba(0, 200, 255, 0.4);
+            text-shadow: 0 0 2px black;
         }
         .look-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: radial-gradient(ellipse at center, #d0d0d0 0%, #9c9c9c 100%);
             transform: scale(1.1);
         }
         #look-up {
@@ -181,7 +178,7 @@
         #look-center {
             grid-column: 2;
             grid-row: 2;
-            background: rgba(255, 255, 255, 0.1);
+            background: radial-gradient(ellipse at center, #a0a0a0 0%, #707070 100%);
             font-size: 14px;
         }
         #look-right {
@@ -192,7 +189,6 @@
             grid-column: 2;
             grid-row: 3;
         }
-        
         /* Información de rendimiento */
         #performance-warning {
             position: absolute;
@@ -218,7 +214,6 @@
             backdrop-filter: blur(5px);
             z-index: 100;
         }
-        
         /* Información de estrella seleccionada */
         #selected-star-info {
             position: absolute;
@@ -238,7 +233,6 @@
             max-width: 90%;
             box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
         }
-        
         /* Información de planeta seleccionado */
         #selected-planet-info {
             position: absolute;
@@ -269,7 +263,6 @@
             cursor: pointer;
             pointer-events: auto;
         }
-        
         .star-marker {
             position: absolute;
             width: 16px;
@@ -288,7 +281,6 @@
             50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
         }
-        
         /* Media queries para diferentes orientaciones */
         @media (max-width: 768px) and (orientation: portrait) {
             #info-panel {
@@ -312,7 +304,6 @@
                 font-size: 14px;
             }
         }
-        
         @media (max-width: 768px) and (orientation: landscape) {
             #info-panel {
                 max-width: 160px;
@@ -345,7 +336,6 @@
                 left: 5px;
             }
         }
-
         /* Texto powered by DEEPSEEK */
         .powered-by {
             position: absolute;
@@ -356,7 +346,6 @@
             font-size: 0.9em;
             font-style: italic;
         }
-        
         /* Joystick de movimiento */
         #movement-joystick {
             position: absolute;
@@ -366,20 +355,24 @@
             height: 100px;
             pointer-events: auto;
             z-index: 10;
-            background: rgba(255, 255, 255, 0.2);
+            /* Color dorado real */
+            background: radial-gradient(ellipse at center, #FFD700 0%, #D4AF37 100%);
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            border: 2px solid #b8860b;
             backdrop-filter: blur(5px);
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.7);
         }
         .joystick-inner {
             width: 40px;
             height: 40px;
-            background: rgba(255, 255, 255, 0.8);
+            /* Color dorado más oscuro para el joystick */
+            background: radial-gradient(ellipse at center, #D4AF37 0%, #B8860B 100%);
             border-radius: 50%;
             transition: transform 0.1s;
+            border: 1px solid #8B6914;
         }
         .joystick-label {
             position: absolute;
@@ -390,7 +383,6 @@
             font-size: 11px;
             text-shadow: 0 0 5px black;
         }
-        
         /* Controles de idioma */
         #language-controls {
             position: absolute;
@@ -433,14 +425,12 @@
         </div>
         <div class="powered-by">powered by DEEPSEEK</div>
     </div>
-
     <div id="ui-container">
         <!-- Controles de idioma -->
         <div id="language-controls">
             <button id="lang-es" class="lang-btn active">Español</button>
             <button id="lang-en" class="lang-btn">English</button>
         </div>
-        
         <div id="info-panel">
             <h3 id="location-name">Espacio Interestelar</h3>
             <div id="location-desc">Navegando entre sistemas estelares</div>
@@ -449,43 +439,36 @@
                 <span id="scale-label">Escala:</span> <span id="scale-value">1.0</span><br>
                 <span id="distance-label">Distancia:</span> <span id="distance-value">0 AL</span><br>
                 <span id="speed-label">Velocidad:</span> <span id="speed-value">1.0x</span><br>
-                <span id="orbit-speed-label">Vel. Órbitas:</span> <span id="orbit-speed-value">1.0x</span><br>
+                <span id="orbit-speed-label"> Vel. Órbitas:</span> <span id="orbit-speed-value">1.0x</span><br>
                 <span id="galaxy-label">Galaxia:</span> <span id="galaxy-value">Nebulosa Primordial</span>
             </div>
         </div>
-        
         <button id="mode-toggle"><span id="mode-toggle-text">Modo:</span> <span id="mode-toggle-value">Orbital</span></button>
-        
         <!-- Controles de velocidad en la parte superior derecha -->
         <div id="speed-controls">
-            <button class="speed-btn" id="player-speed-btn"><span id="speed-label-btn">Vel:</span> 1x</button>
+            <button class="speed-btn" id="player-speed-btn"><span id="speed-label-btn"> Vel:</span> 1x</button>
             <button class="speed-btn" id="orbit-speed-btn"><span id="orbit-speed-label-btn">Órbita:</span> 1x</button>
             <button class="speed-btn" id="pause-btn"><span id="pause-label">Pausa</span></button>
         </div>
-        
         <!-- Joystick con elemento visual añadido -->
         <div id="movement-joystick">
             <div class="joystick-inner"></div>
             <div class="joystick-label" id="movement-label">Movimiento</div>
         </div>
-        
         <!-- Controles de cámara -->
         <div id="look-controls">
-            <button class="look-btn" id="look-up">▲</button>
-            <button class="look-btn" id="look-left">◀</button>
-            <button class="look-btn" id="look-center">⊙</button>
-            <button class="look-btn" id="look-right">▶</button>
-            <button class="look-btn" id="look-down">▼</button>
+            <button class="look-btn" id="look-up"> ▲ </button>
+            <button class="look-btn" id="look-left"> ◀ </button>
+            <button class="look-btn" id="look-center"> ⊙ </button>
+            <button class="look-btn" id="look-right"> ▶ </button>
+            <button class="look-btn" id="look-down"> ▼ </button>
         </div>
-        
         <div id="performance-warning">
             <span id="performance-warning-text">Modo de rendimiento bajo activado</span>
         </div>
-        
         <div id="optimization-info">
             <span id="stars-label">Estrellas:</span> <span id="star-count">0</span> | <span id="fps-label">FPS:</span> <span id="fps-counter">0</span>
         </div>
-        
         <div id="selected-star-info">
             <h3 id="selected-star-name">Nombre de Estrella</h3>
             <p id="selected-star-distance">Distancia: 0 AL</p>
@@ -493,7 +476,6 @@
             <p id="selected-star-planets">Planetas: 0</p>
             <button id="set-target-btn" style="margin-top: 8px; padding: 5px 10px; background: #ff3366; border: none; border-radius: 5px; color: white; pointer-events: auto;"><span id="set-target-text">Establecer como objetivo</span></button>
         </div>
-        
         <div id="selected-planet-info">
             <button id="close-planet-info">×</button>
             <h3 id="selected-planet-name">Nombre Planeta</h3>
@@ -503,11 +485,9 @@
             <p id="selected-planet-temp">Temperatura: 15°C</p>
             <p id="selected-planet-desc">Descripción: Planeta con condiciones habitables.</p>
         </div>
-        
         <div id="star-marker" class="star-marker"></div>
         <div id="target-indicator"></div>
     </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         // Variables globales optimizadas
@@ -537,16 +517,17 @@
         let currentLanguage = 'es';
         let lastOrbitUpdate = 0;
         let orbitUpdateThreshold = 16;
-        
         // Constantes optimizadas para rendimiento
         const LIGHT_YEAR = 1;
         const GALAXY_SIZE = 50000 * LIGHT_YEAR;
         const INTERGALACTIC_DISTANCE = 150000 * LIGHT_YEAR;
-        const STAR_COUNT = 100;
+        const STAR_COUNT = 150; // Aumentado a 150 estrellas
         const MIN_PLANETS = 1;
         const MAX_PLANETS = 3;
         const MIN_STAR_DISTANCE = 10 * LIGHT_YEAR;
-        
+        // Nuevas constantes para LOD
+        const LOD_DISTANCE_THRESHOLD = 10000; // Distancia en AL para cambiar a LOD
+        const LOD_TRANSITION_SPEED = 0.05; // Velocidad de transición
         // Colores de estrellas por tipo
         const STAR_COLORS = {
             O: 0x9bb0ff,
@@ -557,7 +538,6 @@
             K: 0xffd2a1,
             M: 0xffcc6f
         };
-        
         // Tipos de planetas y sus características
         const PLANET_TYPES = {
             terrestrial: {
@@ -591,12 +571,10 @@
                 tempRange: [-220, -150]
             }
         };
-        
         // Colores de nebulosas
         const NEBULA_COLORS = [
             0xff6b6b, 0x4ecdc4, 0x45b7d1, 0x96ceb4, 0xca8eff, 0xff8fb1
         ];
-        
         // Nombres aleatorios para galaxias
         const GALAXY_NAMES = [
             { es: "Nebulosa Primordial", en: "Primordial Nebula" },
@@ -604,7 +582,6 @@
             { es: "Remanente Cósmico", en: "Cosmic Remnant" },
             { es: "Galaxia Espiral Lejana", en: "Distant Spiral Galaxy" }
         ];
-        
         // Textos traducibles
         const translations = {
             es: {
@@ -672,95 +649,26 @@
                 "unknown": "Unknown"
             }
         };
-        
         // Semilla para generación procedural
         function seededRandom() {
             const x = Math.sin(currentSeed++) * 10000;
             return x - Math.floor(x);
         }
-        
         // Generar nombre aleatorio para galaxia
         function getRandomGalaxyName() {
             const index = Math.floor(seededRandom() * GALAXY_NAMES.length);
             return GALAXY_NAMES[index];
         }
-        
-        // Inicialización optimizada
-        function init() {
-            updateProgress(10);
-            
-            // Crear escena
-            scene = new THREE.Scene();
-            
-            // Crear cámara
-            const aspectRatio = window.innerWidth / window.innerHeight;
-            camera = new THREE.PerspectiveCamera(75, aspectRatio, 1, 1e6 * LIGHT_YEAR);
-            camera.position.set(0, 5000 * LIGHT_YEAR, 10000 * LIGHT_YEAR);
-            camera.lookAt(0, 0, 0);
-            
-            updateProgress(30);
-            
-            // Crear renderizador
-            renderer = new THREE.WebGLRenderer({ 
-                antialias: false,
-                alpha: true,
-                powerPreference: 'high-performance'
-            });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
-            document.body.appendChild(renderer.domElement);
-            
-            // Configurar luces
-            const ambientLight = new THREE.AmbientLight(0x333333);
-            scene.add(ambientLight);
-            
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            directionalLight.position.set(1, 1, 1).normalize();
-            scene.add(directionalLight);
-            
-            updateProgress(50);
-            
-            // Crear galaxias
-            createGalaxies();
-            
-            updateProgress(70);
-            
-            // Configurar eventos y controles
-            setupEventListeners();
-            setupJoystick();
-            
-            updateProgress(100);
-            
-            // Obtener referencia al joystick interno
-            joystickInner = document.querySelector('.joystick-inner');
-            
-            // Ocultar pantalla de carga
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                animate();
-            }, 800);
-            
-            // Actualizar UI
-            updateUI();
-            document.getElementById('star-count').textContent = Object.keys(stars).length;
-        }
-        
-        function updateProgress(percent) {
-            document.getElementById('progress').style.width = percent + '%';
-        }
-        
         // Crear textura para un planeta
         function createPlanetTexture(type) {
             const canvas = document.createElement('canvas');
             canvas.width = 256;
             canvas.height = 256;
             const context = canvas.getContext('2d');
-            
             // Fondo base según tipo
             if (type === 'terrestrial') {
                 context.fillStyle = '#1E3F73';
                 context.fillRect(0, 0, 256, 256);
-                
                 context.fillStyle = '#3D8B61';
                 for (let i = 0; i < 8; i++) {
                     const x = Math.random() * 256;
@@ -774,7 +682,6 @@
                 const hue = Math.random() * 360;
                 context.fillStyle = `hsl(${hue}, 70%, 30%)`;
                 context.fillRect(0, 0, 256, 256);
-                
                 // Bandas de nubes
                 for (let i = 0; i < 5; i++) {
                     const y = Math.random() * 256;
@@ -786,7 +693,6 @@
             } else {
                 context.fillStyle = '#B3E0FF';
                 context.fillRect(0, 0, 256, 256);
-                
                 context.strokeStyle = '#99C2E0';
                 context.lineWidth = 1;
                 for (let i = 0; i < 30; i++) {
@@ -798,24 +704,19 @@
                     context.stroke();
                 }
             }
-            
             return new THREE.CanvasTexture(canvas);
         }
-        
         // Crear nebulosas
         function createNebulae(count, offsetX = 0, offsetY = 0, offsetZ = 0) {
             for (let i = 0; i < count; i++) {
                 const angle = seededRandom() * Math.PI * 2;
                 const radius = 5000 + seededRandom() * (GALAXY_SIZE - 5000);
                 const height = (seededRandom() - 0.5) * GALAXY_SIZE / 20;
-                
                 const x = offsetX + Math.cos(angle) * radius;
                 const y = offsetY + height;
                 const z = offsetZ + Math.sin(angle) * radius;
-                
                 const size = 50 + seededRandom() * 150;
                 const color = NEBULA_COLORS[Math.floor(seededRandom() * NEBULA_COLORS.length)];
-                
                 const geometry = new THREE.SphereGeometry(size, 8, 6);
                 const material = new THREE.MeshBasicMaterial({
                     color: color,
@@ -823,50 +724,38 @@
                     opacity: 0.15,
                     blending: THREE.AdditiveBlending
                 });
-                
                 const nebula = new THREE.Mesh(geometry, material);
                 nebula.position.set(x, y, z);
                 scene.add(nebula);
                 nebulae.push(nebula);
             }
         }
-        
         // Generar un planeta
         function generatePlanet(star, index, starRadius, offsetX = 0, offsetY = 0, offsetZ = 0) {
             const baseOrbitDistance = starRadius * 10;
             const orbitDistance = baseOrbitDistance * (index + 1) * (1 + seededRandom() * 0.5);
-            
             const planetTypes = Object.keys(PLANET_TYPES);
             const planetType = planetTypes[Math.floor(seededRandom() * planetTypes.length)];
             const planetInfo = PLANET_TYPES[planetType];
-            
-            let planetSize = starRadius * (0.1 + seededRandom() * 0.3) * (planetInfo.radiusRange[0] + 
-                              seededRandom() * (planetInfo.radiusRange[1] - planetInfo.radiusRange[0]));
-            
+            let planetSize = starRadius * (0.1 + seededRandom() * 0.3) * (planetInfo.radiusRange[0] +
+                seededRandom() * (planetInfo.radiusRange[1] - planetInfo.radiusRange[0]));
             planetSize = Math.min(planetSize, starRadius * 0.8);
-            
             const planetSpeed = 0.005 / (index + 1);
             const planetAngle = seededRandom() * Math.PI * 2;
-            
             const planetDay = planetInfo.dayRange[0] + seededRandom() * (planetInfo.dayRange[1] - planetInfo.dayRange[0]);
             const planetTemp = planetInfo.tempRange[0] + seededRandom() * (planetInfo.tempRange[1] - planetInfo.tempRange[0]);
-            
             const planetTexture = createPlanetTexture(planetType);
             const planetGeometry = new THREE.SphereGeometry(planetSize, 16, 16);
-            const planetMaterial = new THREE.MeshLambertMaterial({ 
+            const planetMaterial = new THREE.MeshLambertMaterial({
                 map: planetTexture
             });
-            
             const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
-            
             planetMesh.position.set(
                 offsetX + star.position.x + Math.cos(planetAngle) * orbitDistance,
                 offsetY + star.position.y,
                 offsetZ + star.position.z + Math.sin(planetAngle) * orbitDistance
             );
-            
             scene.add(planetMesh);
-            
             const planetData = {
                 mesh: planetMesh,
                 orbitRadius: orbitDistance,
@@ -882,73 +771,139 @@
                 description_en: planetInfo.desc_en,
                 star: star.name
             };
-            
             planets.push(planetData);
             return planetData;
         }
-        
+        // Crear sprite para estrella (LOD)
+        function createStarSprite(color, radius) {
+            // Convertir color hexadecimal a valores RGB
+            const r = (color >> 16) & 0xFF;
+            const g = (color >> 8) & 0xFF;
+            const b = color & 0xFF;
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const context = canvas.getContext('2d');
+            // Crear un círculo brillante
+            context.beginPath();
+            context.arc(32, 32, 32, 0, Math.PI * 2);
+            const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
+            // Usar valores RGB decimales en lugar de código hexadecimal
+            gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 255)`);
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            context.fillStyle = gradient;
+            context.fill();
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true,
+                opacity: 1.0
+            });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(radius * 0.1, radius * 0.1, 1);
+            return sprite;
+        }
+        // Crear agujero negro en el centro de la galaxia con disco de acreción
+        function createBlackHole(offsetX = 0, offsetY = 0, offsetZ = 0) {
+            // Crear el agujero negro como una esfera negra
+            const blackHoleGeometry = new THREE.SphereGeometry(500, 32, 32);
+            const blackHoleMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000000, // Negro absoluto
+                emissive: 0x000000
+            });
+            const blackHole = new THREE.Mesh(blackHoleGeometry, blackHoleMaterial);
+            blackHole.position.set(offsetX, offsetY, offsetZ);
+            scene.add(blackHole);
+            
+            // Agregar un halo brillante alrededor del agujero negro
+            const haloGeometry = new THREE.SphereGeometry(700, 32, 32);
+            const haloMaterial = new THREE.MeshBasicMaterial({
+                color: 0x1a1a2e,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.BackSide
+            });
+            const halo = new THREE.Mesh(haloGeometry, haloMaterial);
+            halo.position.set(offsetX, offsetY, offsetZ);
+            scene.add(halo);
+            
+            // Crear disco de acreción
+            const diskGeometry = new THREE.RingGeometry(800, 2000, 64);
+            const diskMaterial = new THREE.MeshBasicMaterial({
+                color: 0xff5500,
+                transparent: true,
+                opacity: 0.7,
+                side: THREE.DoubleSide
+            });
+            const disk = new THREE.Mesh(diskGeometry, diskMaterial);
+            disk.position.set(offsetX, offsetY, offsetZ);
+            disk.rotation.x = Math.PI / 2; // Rotar para que esté plano
+            scene.add(disk);
+            
+            return {
+                mesh: blackHole,
+                halo: halo,
+                disk: disk,
+                position: new THREE.Vector3(offsetX, offsetY, offsetZ)
+            };
+        }
         // Crear galaxia
         function createGalaxy(offsetX = 0, offsetY = 0, offsetZ = 0, galaxyType = 0) {
             const placedPositions = [];
             const galaxyStars = {};
-            
             const starTypes = ['O', 'B', 'A', 'F', 'G', 'K', 'M'];
+            
+            // Crear el agujero negro en el centro
+            const blackHole = createBlackHole(offsetX, offsetY, offsetZ);
             
             for (let i = 0; i < STAR_COUNT; i++) {
                 let attempts = 0;
                 let validPosition = false;
                 let x, y, z;
-                
                 while (!validPosition && attempts < 50) {
                     const angle = seededRandom() * Math.PI * 2;
                     const galacticRadius = 1000 + seededRandom() * (GALAXY_SIZE - 1000);
                     const height = (seededRandom() - 0.5) * GALAXY_SIZE / 15;
-                    
                     x = offsetX + Math.cos(angle) * galacticRadius;
                     y = offsetY + height;
                     z = offsetZ + Math.sin(angle) * galacticRadius;
-                    
                     const distanceToCenter = Math.sqrt(
-                        Math.pow(x - offsetX, 2) + 
-                        Math.pow(y - offsetY, 2) + 
+                        Math.pow(x - offsetX, 2) +
+                        Math.pow(y - offsetY, 2) +
                         Math.pow(z - offsetZ, 2)
                     );
-                    
-                    if (distanceToCenter < 2000) {
+                    // Evitar colocar estrellas muy cerca del centro (donde está el agujero negro)
+                    if (distanceToCenter < 3000) {
                         attempts++;
                         continue;
                     }
-                    
                     validPosition = true;
                     for (const pos of placedPositions) {
                         const distance = Math.sqrt(
-                            Math.pow(x - pos.x, 2) + 
-                            Math.pow(y - pos.y, 2) + 
+                            Math.pow(x - pos.x, 2) +
+                            Math.pow(y - pos.y, 2) +
                             Math.pow(z - pos.z, 2)
                         );
-                        
                         if (distance < MIN_STAR_DISTANCE) {
                             validPosition = false;
                             break;
                         }
                     }
-                    
                     attempts++;
                 }
-                
                 if (!validPosition) continue;
-                
-                placedPositions.push({x, y, z});
-                
+                placedPositions.push({ x, y, z });
                 const typeIndex = Math.floor(Math.pow(seededRandom(), 1.5) * starTypes.length);
                 const starType = starTypes[typeIndex];
                 const starColor = STAR_COLORS[starType];
-                
                 const sizeFactors = { O: 2.0, B: 1.5, A: 1.2, F: 1.0, G: 0.8, K: 0.6, M: 0.5 };
                 const starRadius = (sizeFactors[starType] || 1.0) * (0.9 + seededRandom() * 0.2) * 15;
-                
                 const name = `HIP ${Math.floor(10000 + seededRandom() * 90000)}-${galaxyType}`;
-                
+                // Crear el sprite para LOD
+                const sprite = createStarSprite(starColor, starRadius);
+                sprite.position.set(x, y, z);
+                scene.add(sprite);
+                // Crear el modelo 3D para cuando estés cerca
                 const starGeometry = new THREE.SphereGeometry(starRadius, 12, 10);
                 const starMaterial = new THREE.MeshBasicMaterial({
                     color: starColor,
@@ -956,23 +911,19 @@
                     emissiveIntensity: 4.0,
                     transparent: true
                 });
-                
                 const starMesh = new THREE.Mesh(starGeometry, starMaterial);
                 starMesh.position.set(x, y, z);
-                
                 const starLight = new THREE.PointLight(starColor, 2.5, 5000 * LIGHT_YEAR);
                 starLight.position.set(x, y, z);
                 scene.add(starLight);
                 scene.add(starMesh);
-                
                 const planetCount = Math.floor(seededRandom() * (MAX_PLANETS - MIN_PLANETS + 1)) + MIN_PLANETS;
                 const starPlanets = [];
-                
                 if (seededRandom() < 0.3) {
                     for (let p = 0; p < planetCount; p++) {
                         const planet = generatePlanet(
-                            {position: {x, y, z}, name, radius: starRadius}, 
-                            p, 
+                            { position: { x, y, z }, name, radius: starRadius },
+                            p,
                             starRadius,
                             offsetX,
                             offsetY,
@@ -981,81 +932,86 @@
                         starPlanets.push(planet);
                     }
                 }
-                
                 galaxyStars[name] = {
+                    sprite: sprite,
                     mesh: starMesh,
                     light: starLight,
                     radius: starRadius,
                     name: name,
                     type: starType,
                     distance: Math.sqrt(
-                        Math.pow(x - offsetX, 2) + 
-                        Math.pow(y - offsetY, 2) + 
+                        Math.pow(x - offsetX, 2) +
+                        Math.pow(y - offsetY, 2) +
                         Math.pow(z - offsetZ, 2)
                     ),
                     position: new THREE.Vector3(x, y, z),
-                    planets: starPlanets
+                    planets: starPlanets,
+                    is3D: false
                 };
             }
-            
             return galaxyStars;
         }
-        
-        // Crear múltiples galaxias (solo 3)
+        // Crear múltiples galaxias (solo 1)
         function createGalaxies() {
-            // Galaxia 1
+            // Galaxia 1 (solo una galaxia)
             const galaxyName1 = getRandomGalaxyName();
             const galaxy1Stars = createGalaxy(0, 0, 0, 0);
             createNebulae(3, 0, 0, 0);
-            
-            // Galaxia 2
-            const galaxyName2 = getRandomGalaxyName();
-            const galaxy2Stars = createGalaxy(INTERGALACTIC_DISTANCE, 0, 0, 1);
-            createNebulae(2, INTERGALACTIC_DISTANCE, 0, 0);
-            
-            // Galaxia 3
-            const galaxyName3 = getRandomGalaxyName();
-            const galaxy3Stars = createGalaxy(0, 0, INTERGALACTIC_DISTANCE, 2);
-            createNebulae(2, 0, 0, INTERGALACTIC_DISTANCE);
-            
             // Combinar todas las estrellas
-            stars = Object.assign({}, galaxy1Stars, galaxy2Stars, galaxy3Stars);
-            
+            stars = Object.assign({}, galaxy1Stars);
             // Almacenar información de galaxias
             galaxies = [
-                {stars: galaxy1Stars, name: galaxyName1},
-                {stars: galaxy2Stars, name: galaxyName2},
-                {stars: galaxy3Stars, name: galaxyName3}
+                { stars: galaxy1Stars, name: galaxyName1 }
             ];
-            
             // Actualizar información de la galaxia actual
             document.getElementById('galaxy-value').textContent = currentLanguage === 'es' ? galaxyName1.es : galaxyName1.en;
         }
-        
+        // Actualizar LOD de todas las estrellas y planetas
+        function updateLOD() {
+            const cameraPosition = camera.position;
+            const cameraDistance = cameraPosition.length();
+            for (const starName in stars) {
+                const star = stars[starName];
+                const starPosition = star.position;
+                const distance = cameraPosition.distanceTo(starPosition);
+                // Actualizar LOD para estrellas
+                if (distance > LOD_DISTANCE_THRESHOLD) {
+                    if (!star.is3D) {
+                        // Si ya está en modo sprite, no hacer nada
+                        star.sprite.visible = true;
+                        star.mesh.visible = false;
+                    }
+                } else {
+                    if (!star.is3D) {
+                        // Transición a 3D
+                        star.is3D = true;
+                        star.sprite.visible = true;
+                        star.mesh.visible = true;
+                    }
+                    // Ajustar tamaño del sprite para transición suave
+                    const spriteSize = Math.max(0, (LOD_DISTANCE_THRESHOLD - distance) / LOD_DISTANCE_THRESHOLD * 10);
+                    star.sprite.scale.set(spriteSize, spriteSize, 1);
+                }
+            }
+        }
         // Configurar joystick de movimiento
         function setupJoystick() {
             const joystickArea = document.getElementById('movement-joystick');
             let isTouching = false;
             let touchId = null;
             let startX = 0, startY = 0;
-            
             joystickArea.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 if (isTouching) return;
-                
                 isTouching = true;
                 touchId = e.changedTouches[0].identifier;
-                const touch = e.changedTouches[0];
                 const rect = joystickArea.getBoundingClientRect();
-                
                 startX = rect.width / 2;
                 startY = rect.height / 2;
             });
-            
             joystickArea.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 if (!isTouching) return;
-                
                 let touch = null;
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     if (e.changedTouches[i].identifier === touchId) {
@@ -1063,32 +1019,26 @@
                         break;
                     }
                 }
-                
                 if (!touch) return;
-                
                 const rect = joystickArea.getBoundingClientRect();
                 const x = touch.clientX - rect.left;
                 const y = touch.clientY - rect.top;
-                
                 const dx = (x - startX) / (rect.width / 2);
                 const dy = (startY - y) / (rect.height / 2);
-                
                 const distance = Math.min(1, Math.sqrt(dx * dx + dy * dy));
                 const angle = Math.atan2(dy, dx);
-                
-                moveDirection.x = Math.cos(angle) * distance;
+                // Corregir dirección del movimiento (invertir x)
+                moveDirection.x = Math.cos(angle) * distance * -1;
                 moveDirection.z = Math.sin(angle) * distance;
-                
                 if (joystickInner) {
                     const maxMovement = 25;
-                    joystickInner.style.transform = `translate(${dx * maxMovement}px, ${-dy * maxMovement}px)`;
+                    // Corregir dirección visual del joystick (invertir x)
+                    joystickInner.style.transform = `translate(${-dx * maxMovement}px, ${-dy * maxMovement}px)`;
                 }
             });
-            
             joystickArea.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 if (!isTouching) return;
-                
                 let isCorrectTouch = false;
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     if (e.changedTouches[i].identifier === touchId) {
@@ -1096,44 +1046,35 @@
                         break;
                     }
                 }
-                
                 if (isCorrectTouch) {
                     isTouching = false;
                     moveDirection.x = 0;
                     moveDirection.z = 0;
-                    
                     if (joystickInner) {
                         joystickInner.style.transform = 'translate(0, 0)';
                     }
                 }
             });
-            
             joystickArea.addEventListener('touchcancel', (e) => {
                 e.preventDefault();
                 isTouching = false;
                 moveDirection.x = 0;
                 moveDirection.z = 0;
-                
                 if (joystickInner) {
                     joystickInner.style.transform = 'translate(0, 0)';
                 }
             });
         }
-        
         // Actualizar órbitas de planetas
         function updateOrbits(time) {
             if (!isPaused && time - lastOrbitUpdate > orbitUpdateThreshold) {
                 lastOrbitUpdate = time;
-                
                 for (const starName in stars) {
                     const star = stars[starName];
-                    
                     for (const planet of star.planets) {
                         planet.angle += planet.speed * orbitSpeed;
-                        
                         const newX = star.position.x + Math.cos(planet.angle) * planet.orbitRadius;
                         const newZ = star.position.z + Math.sin(planet.angle) * planet.orbitRadius;
-                        
                         if (planet.mesh) {
                             planet.mesh.position.setX(newX);
                             planet.mesh.position.setZ(newZ);
@@ -1143,59 +1084,54 @@
                 }
             }
         }
-        
         // Configurar eventos táctiles
         function setupEventListeners() {
             // Botones de mirada
             const lookButtons = ['look-up', 'look-down', 'look-left', 'look-right'];
-            
             lookButtons.forEach(id => {
                 const button = document.getElementById(id);
                 const direction = id.split('-')[1];
-                
                 button.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    if (direction === 'up') lookActive.down = true;
-                    else if (direction === 'down') lookActive.up = true;
-                    else if (direction === 'left') lookActive.right = true;
-                    else if (direction === 'right') lookActive.left = true;
+                    // Corregir direcciones (invertir up/down y left/right)
+                    if (direction === 'up') lookActive.up = true;
+                    else if (direction === 'down') lookActive.down = true;
+                    else if (direction === 'left') lookActive.left = true;
+                    else if (direction === 'right') lookActive.right = true;
                 });
-                
                 button.addEventListener('touchend', (e) => {
                     e.preventDefault();
-                    if (direction === 'up') lookActive.down = false;
-                    else if (direction === 'down') lookActive.up = false;
-                    else if (direction === 'left') lookActive.right = false;
-                    else if (direction === 'right') lookActive.left = false;
+                    // Corregir direcciones (invertir up/down y left/right)
+                    if (direction === 'up') lookActive.up = false;
+                    else if (direction === 'down') lookActive.down = false;
+                    else if (direction === 'left') lookActive.left = false;
+                    else if (direction === 'right') lookActive.right = false;
                 });
-                
                 button.addEventListener('mousedown', (e) => {
                     e.preventDefault();
-                    if (direction === 'up') lookActive.down = true;
-                    else if (direction === 'down') lookActive.up = true;
-                    else if (direction === 'left') lookActive.right = true;
-                    else if (direction === 'right') lookActive.left = true;
+                    // Corregir direcciones (invertir up/down y left/right)
+                    if (direction === 'up') lookActive.up = true;
+                    else if (direction === 'down') lookActive.down = true;
+                    else if (direction === 'left') lookActive.left = true;
+                    else if (direction === 'right') lookActive.right = true;
                 });
-                
                 button.addEventListener('mouseup', (e) => {
                     e.preventDefault();
-                    if (direction === 'up') lookActive.down = false;
-                    else if (direction === 'down') lookActive.up = false;
-                    else if (direction === 'left') lookActive.right = false;
-                    else if (direction === 'right') lookActive.left = false;
+                    // Corregir direcciones (invertir up/down y left/right)
+                    if (direction === 'up') lookActive.up = false;
+                    else if (direction === 'down') lookActive.down = false;
+                    else if (direction === 'left') lookActive.left = false;
+                    else if (direction === 'right') lookActive.right = false;
                 });
             });
-            
             document.getElementById('look-center').addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 camera.lookAt(0, 0, 0);
             });
-            
             document.getElementById('look-center').addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 camera.lookAt(0, 0, 0);
             });
-            
             // Controles de velocidad
             document.getElementById('player-speed-btn').addEventListener('touchstart', (e) => {
                 e.preventDefault();
@@ -1205,7 +1141,6 @@
                 updateSpeedButtons();
                 updateUI();
             });
-            
             document.getElementById('orbit-speed-btn').addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 const speeds = [0, 0.01, 0.1, 0.5, 1, 2, 5];
@@ -1214,40 +1149,32 @@
                 updateSpeedButtons();
                 updateUI();
             });
-            
             document.getElementById('pause-btn').addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 isPaused = !isPaused;
                 updatePauseButton();
                 updateUI();
             });
-            
             // Evento para seleccionar estrellas y planetas
             renderer.domElement.addEventListener('touchstart', handleSelection, { passive: true });
             renderer.domElement.addEventListener('mousedown', handleSelection);
-            
             // Botón para establecer objetivo
             document.getElementById('set-target-btn').addEventListener('click', setTargetStar);
-            
             // Botón para cerrar información del planeta
             document.getElementById('close-planet-info').addEventListener('click', closePlanetInfo);
-            
             // Ajustar tamaño al cambiar orientación
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
-            
             // Botones de idioma
             document.getElementById('lang-es').addEventListener('click', () => setLanguage('es'));
             document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
         }
-        
         // Manejar selección de estrellas y planetas
         function handleSelection(event) {
             let clientX, clientY;
-            
             if (event.touches) {
                 if (event.touches.length !== 1) return;
                 clientX = event.touches[0].clientX;
@@ -1256,68 +1183,53 @@
                 clientX = event.clientX;
                 clientY = event.clientY;
             }
-            
             const rect = renderer.domElement.getBoundingClientRect();
-            
             mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
             mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-            
             raycaster.setFromCamera(mouse, camera);
-            
             // Primero verificar si se hizo clic en un planeta
             let closestPlanet = null;
             let closestDistance = Infinity;
-            
             for (const planet of planets) {
                 const planetPosition = planet.mesh.position;
                 const distance = camera.position.distanceTo(planetPosition);
-                
                 if (distance < 5000 * LIGHT_YEAR) {
                     const screenPosition = new THREE.Vector3();
                     screenPosition.copy(planetPosition);
                     screenPosition.project(camera);
-                    
                     const dx = mouse.x - screenPosition.x;
                     const dy = mouse.y - screenPosition.y;
                     const screenDistance = Math.sqrt(dx * dx + dy * dy);
-                    
                     if (screenDistance < 0.1 && screenDistance < closestDistance) {
                         closestDistance = screenDistance;
                         closestPlanet = planet;
                     }
                 }
             }
-            
             if (closestPlanet) {
                 selectPlanet(closestPlanet);
                 return;
             }
-            
             // Si no se seleccionó un planeta, buscar estrellas
             let closestStar = null;
             closestDistance = Infinity;
-            
             for (const starName in stars) {
                 const star = stars[starName];
                 const starPosition = star.position;
                 const distance = camera.position.distanceTo(starPosition);
-                
                 if (distance < 50000 * LIGHT_YEAR) {
                     const screenPosition = new THREE.Vector3();
                     screenPosition.copy(starPosition);
                     screenPosition.project(camera);
-                    
                     const dx = mouse.x - screenPosition.x;
                     const dy = mouse.y - screenPosition.y;
                     const screenDistance = Math.sqrt(dx * dx + dy * dy);
-                    
                     if (screenDistance < 0.1 && screenDistance < closestDistance) {
                         closestDistance = screenDistance;
                         closestStar = star;
                     }
                 }
             }
-            
             if (closestStar) {
                 selectStar(closestStar);
             } else {
@@ -1326,81 +1238,61 @@
                 selectedStar = null;
             }
         }
-        
         // Función para seleccionar una estrella
         function selectStar(star) {
             selectedStar = star;
-            
             document.getElementById('selected-star-name').textContent = star.name;
             document.getElementById('selected-star-distance').textContent = `${currentLanguage === 'es' ? 'Distancia:' : 'Distance:'} ${Math.round(star.distance)} ${currentLanguage === 'es' ? 'AL' : 'LY'}`;
             document.getElementById('selected-star-type').textContent = `${currentLanguage === 'es' ? 'Tipo:' : 'Type:'} ${star.type}`;
             document.getElementById('selected-star-planets').textContent = `${currentLanguage === 'es' ? 'Planetas:' : 'Planets:'} ${star.planets.length}`;
-            
             document.getElementById('selected-star-info').style.display = 'block';
-            
             const marker = document.getElementById('star-marker');
             marker.style.display = 'block';
-            
             function updateMarkerPosition() {
                 if (!selectedStar) return;
-                
                 const vector = new THREE.Vector3();
                 vector.setFromMatrixPosition(star.mesh.matrixWorld);
                 vector.project(camera);
-                
                 const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
                 const y = (-(vector.y * 0.5 + 0.5)) * window.innerHeight;
-                
                 marker.style.left = `${x}px`;
                 marker.style.top = `${y}px`;
-                
                 requestAnimationFrame(updateMarkerPosition);
             }
-            
             updateMarkerPosition();
         }
-        
         // Función para seleccionar un planeta
         function selectPlanet(planet) {
             selectedPlanet = planet;
-            
             document.getElementById('selected-planet-name').textContent = currentLanguage === 'es' ? planet.name : planet.name_en;
             document.getElementById('selected-planet-type').textContent = `${currentLanguage === 'es' ? 'Tipo:' : 'Type:'} ${currentLanguage === 'es' ? PLANET_TYPES[planet.type].name : PLANET_TYPES[planet.type].name_en}`;
             document.getElementById('selected-planet-radius').textContent = `${currentLanguage === 'es' ? 'Radio:' : 'Radius:'} ${planet.radius.toFixed(2)} u`;
             document.getElementById('selected-planet-day').textContent = `${currentLanguage === 'es' ? 'Duración del día:' : 'Day length:'} ${planet.dayLength.toFixed(1)} ${currentLanguage === 'es' ? 'horas' : 'hours'}`;
             document.getElementById('selected-planet-temp').textContent = `${currentLanguage === 'es' ? 'Temperatura:' : 'Temperature:'} ${planet.temperature.toFixed(1)}°C`;
             document.getElementById('selected-planet-desc').textContent = `${currentLanguage === 'es' ? 'Descripción:' : 'Description:'} ${currentLanguage === 'es' ? planet.description : planet.description_en}`;
-            
             document.getElementById('selected-planet-info').style.display = 'block';
         }
-        
         // Cerrar información del planeta
         function closePlanetInfo() {
             document.getElementById('selected-planet-info').style.display = 'none';
             selectedPlanet = null;
         }
-        
         // Establecer estrella como objetivo
         function setTargetStar() {
             if (selectedStar) {
                 targetStar = selectedStar;
-                
                 const indicator = document.getElementById('target-indicator');
                 indicator.style.display = 'block';
-                
                 function updateTargetIndicator() {
                     if (!targetStar) {
                         indicator.style.display = 'none';
                         return;
                     }
-                    
                     const vector = new THREE.Vector3();
                     vector.setFromMatrixPosition(targetStar.mesh.matrixWorld);
                     vector.project(camera);
-                    
                     const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
                     const y = (-(vector.y * 0.5 + 0.5)) * window.innerHeight;
-                    
                     if (x >= 0 && x <= window.innerWidth && y >= 0 && y <= window.innerHeight) {
                         indicator.style.display = 'block';
                         indicator.style.left = `${x}px`;
@@ -1408,16 +1300,12 @@
                     } else {
                         indicator.style.display = 'none';
                     }
-                    
                     requestAnimationFrame(updateTargetIndicator);
                 }
-                
                 updateTargetIndicator();
-                
                 document.getElementById('selected-star-info').style.display = 'none';
             }
         }
-        
         // Cambiar a modo orbital
         function switchToOrbitalMode() {
             viewMode = 'orbital';
@@ -1425,44 +1313,35 @@
             updateModeToggle();
             updateUI();
         }
-        
         // Actualizar interfaz de usuario
         function updateUI() {
             let distanceText = "";
-            
             if (viewMode === 'orbital') {
                 distanceText = Math.round(camera.position.length()) + (currentLanguage === 'es' ? " AL" : " LY");
             } else {
                 distanceText = currentLanguage === 'es' ? "Superficie" : "Surface";
             }
-            
             document.getElementById('scale-value').textContent = currentScale.toExponential(2);
             document.getElementById('distance-value').textContent = distanceText;
             document.getElementById('speed-value').textContent = playerSpeed.toFixed(1) + "x";
             document.getElementById('orbit-speed-value').textContent = orbitSpeed.toFixed(1) + "x";
         }
-        
         // Actualizar contador FPS
         function updateFPS() {
             frameCount++;
             const now = performance.now();
-            
             if (now >= lastFpsUpdate + 1000) {
                 fps = Math.round((frameCount * 1000) / (now - lastFpsUpdate));
                 frameCount = 0;
                 lastFpsUpdate = now;
-                
                 document.getElementById('fps-counter').textContent = fps;
             }
         }
-        
         // Configurar sistema de idiomas
         function setLanguage(lang) {
             currentLanguage = lang;
-            
             document.getElementById('lang-es').classList.toggle('active', lang === 'es');
             document.getElementById('lang-en').classList.toggle('active', lang === 'en');
-            
             for (const key in translations[lang]) {
                 const elements = document.querySelectorAll(`[id="${key}"]`);
                 elements.forEach(el => {
@@ -1471,83 +1350,115 @@
                     }
                 });
             }
-            
             updateSpeedButtons();
             updatePauseButton();
             updateModeToggle();
-            
             if (selectedStar) {
                 selectStar(selectedStar);
             }
-            
             if (selectedPlanet) {
                 selectPlanet(selectedPlanet);
             }
-            
             updateUI();
         }
-        
         // Actualizar textos de botones de velocidad
         function updateSpeedButtons() {
             document.getElementById('player-speed-btn').textContent = `${currentLanguage === 'es' ? 'Vel:' : 'Speed:'} ${playerSpeed}x`;
             document.getElementById('orbit-speed-btn').textContent = `${currentLanguage === 'es' ? 'Órbita:' : 'Orbit:'} ${orbitSpeed}x`;
         }
-        
         // Actualizar texto de botón de pausa
         function updatePauseButton() {
-            document.getElementById('pause-btn').textContent = isPaused ? 
-                (currentLanguage === 'es' ? 'Reanudar' : 'Resume') : 
+            document.getElementById('pause-btn').textContent = isPaused ?
+                (currentLanguage === 'es' ? 'Reanudar' : 'Resume') :
                 (currentLanguage === 'es' ? 'Pausa' : 'Pause');
         }
-        
         // Actualizar texto de botón de modo
         function updateModeToggle() {
-            document.getElementById('mode-toggle-value').textContent = 
-                viewMode === 'orbital' ? 
-                (currentLanguage === 'es' ? 'Orbital' : 'Orbital') : 
+            document.getElementById('mode-toggle-value').textContent =
+                viewMode === 'orbital' ?
+                (currentLanguage === 'es' ? 'Orbital' : 'Orbital') :
                 (currentLanguage === 'es' ? 'Superficie' : 'Surface');
         }
-        
         // Animación optimizada
         function animate(time) {
             requestAnimationFrame(animate);
-            
             const delta = time - lastTime;
             lastTime = time;
-            
             updateFPS();
-            
-            if (lookActive.up) camera.rotation.x += 0.03;
-            if (lookActive.down) camera.rotation.x -= 0.03;
+            // Aplicar rotaciones de cámara corregidas
+            if (lookActive.up) camera.rotation.x -= 0.03;
+            if (lookActive.down) camera.rotation.x += 0.03;
             if (lookActive.left) camera.rotation.y += 0.03;
             if (lookActive.right) camera.rotation.y -= 0.03;
-            
+            updateLOD(); // Actualizar LOD
             updateOrbits(time);
-            
             if (!isPaused) {
                 const moveSpeed = (viewMode === 'surface') ? 1e-9 * playerSpeed * currentScale : playerSpeed * currentScale;
-                
                 const forward = new THREE.Vector3();
                 const right = new THREE.Vector3();
                 camera.getWorldDirection(forward);
                 right.crossVectors(new THREE.Vector3(0, 1, 0), forward).normalize();
-                
                 const moveVector = new THREE.Vector3();
                 moveVector.addScaledVector(forward, moveDirection.z * moveSpeed);
                 moveVector.addScaledVector(right, moveDirection.x * moveSpeed);
-                
                 camera.position.add(moveVector);
-                
                 if (targetStar && playerSpeed >= 1000) {
                     camera.lookAt(targetStar.position);
                 }
             }
-            
             renderer.render(scene, camera);
         }
-        
+        // Inicialización optimizada
+        function init() {
+            updateProgress(10);
+            // Crear escena
+            scene = new THREE.Scene();
+            // Crear cámara
+            const aspectRatio = window.innerWidth / window.innerHeight;
+            camera = new THREE.PerspectiveCamera(75, aspectRatio, 1, 1e6 * LIGHT_YEAR);
+            camera.position.set(0, 5000 * LIGHT_YEAR, 10000 * LIGHT_YEAR);
+            camera.lookAt(0, 0, 0);
+            updateProgress(30);
+            // Crear renderizador
+            renderer = new THREE.WebGLRenderer({
+                antialias: false,
+                alpha: true,
+                powerPreference: 'high-performance'
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+            document.body.appendChild(renderer.domElement);
+            // Configurar luces
+            const ambientLight = new THREE.AmbientLight(0x333333);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(1, 1, 1).normalize();
+            scene.add(directionalLight);
+            updateProgress(50);
+            // Crear galaxias
+            createGalaxies();
+            updateProgress(70);
+            // Configurar eventos y controles
+            setupEventListeners();
+            setupJoystick();
+            updateProgress(100);
+            // Obtener referencia al joystick interno
+            joystickInner = document.querySelector('.joystick-inner');
+            // Ocultar pantalla de carga
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                animate();
+            }, 800);
+            // Actualizar UI
+            updateUI();
+            document.getElementById('star-count').textContent = Object.keys(stars).length;
+        }
+        function updateProgress(percent) {
+            document.getElementById('progress').style.width = percent + '%';
+        }
         // Iniciar la aplicación
         init();
     </script>
 </body>
-</html>                   
+</html>                        
+                
