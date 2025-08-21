@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Galaxy Explorer Final</title>
+    <title>Galaxy Explorer</title>
     <style>
         * {
             margin: 0;
@@ -427,7 +427,7 @@
 <body>
     <div id="loading">
         <h2 class="title">GALAXY EXPLORER</h2>
-        <p class="loading-text">Generando galaxia optimizada</p>
+        <p class="loading-text">Generando universo optimizado</p>
         <div class="progress-bar">
             <div class="progress" id="progress"></div>
         </div>
@@ -449,7 +449,8 @@
                 <span id="scale-label">Escala:</span> <span id="scale-value">1.0</span><br>
                 <span id="distance-label">Distancia:</span> <span id="distance-value">0 AL</span><br>
                 <span id="speed-label">Velocidad:</span> <span id="speed-value">1.0x</span><br>
-                <span id="orbit-speed-label">Vel. Órbitas:</span> <span id="orbit-speed-value">1.0x</span>
+                <span id="orbit-speed-label">Vel. Órbitas:</span> <span id="orbit-speed-value">1.0x</span><br>
+                <span id="galaxy-label">Galaxia:</span> <span id="galaxy-value">Nebulosa Primordial</span>
             </div>
         </div>
         
@@ -512,17 +513,16 @@
         // Variables globales optimizadas
         let scene, camera, renderer;
         let stars = {};
-        let planets = []; // Array para almacenar todos los planetas
+        let planets = [];
         let nebulae = [];
+        let galaxies = [];
         let currentScale = 1.0;
         let viewMode = 'orbital';
-        let currentStar = null;
         let playerSpeed = 1.0;
         let orbitSpeed = 1.0;
         let isPaused = false;
         let moveDirection = { x: 0, y: 0, z: 0 };
         let lookActive = { up: false, down: false, left: false, right: false };
-        let performanceMode = 'high';
         let currentSeed = Math.floor(Math.random() * 1000000);
         let frameCount = 0;
         let lastFpsUpdate = 0;
@@ -534,32 +534,28 @@
         let lastTime = 0;
         let joystickInner;
         let targetStar = null;
-        let starVisibilityFactor = 1.0;
-        let blackHole = null;
-        let blackHoleCluster = [];
-        let currentLanguage = 'es'; // Idioma actual
-        let orbitUpdateInterval;
+        let currentLanguage = 'es';
+        let lastOrbitUpdate = 0;
+        let orbitUpdateThreshold = 16;
         
         // Constantes optimizadas para rendimiento
         const LIGHT_YEAR = 1;
         const GALAXY_SIZE = 50000 * LIGHT_YEAR;
-        const STAR_COUNT = 200;
-        const MIN_PLANETS = 1; // Mínimo 1 planeta
-        const MAX_PLANETS = 3; // Máximo 3 planetas
+        const INTERGALACTIC_DISTANCE = 150000 * LIGHT_YEAR;
+        const STAR_COUNT = 100;
+        const MIN_PLANETS = 1;
+        const MAX_PLANETS = 3;
         const MIN_STAR_DISTANCE = 10 * LIGHT_YEAR;
         
-        // Colores de estrellas por tipo - más variedad
+        // Colores de estrellas por tipo
         const STAR_COLORS = {
-            O: 0x9bb0ff,    // Azul muy claro
-            B: 0xaabfff,    // Azul claro
-            A: 0xcad7ff,    // Blanco azulado
-            F: 0xf8f7ff,    // Blanco
-            G: 0xfff4ea,    // Blanco amarillento
-            K: 0xffd2a1,    // Naranja claro
-            M: 0xffcc6f,    // Naranja
-            R: 0xff6b6b,    // Rojo
-            S: 0xff3366,    // Rojo intenso
-            N: 0xffaa00     // Amarillo
+            O: 0x9bb0ff,
+            B: 0xaabfff,
+            A: 0xcad7ff,
+            F: 0xf8f7ff,
+            G: 0xfff4ea,
+            K: 0xffd2a1,
+            M: 0xffcc6f
         };
         
         // Tipos de planetas y sus características
@@ -593,22 +589,20 @@
                 radiusRange: [2, 6],
                 dayRange: [10, 30],
                 tempRange: [-220, -150]
-            },
-            desert: {
-                name: "Desértico",
-                name_en: "Desert",
-                desc: "Planeta árido con poca o ninguna agua superficial.",
-                desc_en: "Arid planet with little or no surface water.",
-                color: 0xff5722,
-                radiusRange: [0.5, 1.2],
-                dayRange: [15, 80],
-                tempRange: [0, 80]
             }
         };
         
         // Colores de nebulosas
         const NEBULA_COLORS = [
             0xff6b6b, 0x4ecdc4, 0x45b7d1, 0x96ceb4, 0xca8eff, 0xff8fb1
+        ];
+        
+        // Nombres aleatorios para galaxias
+        const GALAXY_NAMES = [
+            { es: "Nebulosa Primordial", en: "Primordial Nebula" },
+            { es: "Cúmulo Estelar Antiguo", en: "Ancient Star Cluster" },
+            { es: "Remanente Cósmico", en: "Cosmic Remnant" },
+            { es: "Galaxia Espiral Lejana", en: "Distant Spiral Galaxy" }
         ];
         
         // Textos traducibles
@@ -621,6 +615,7 @@
                 "distance-label": "Distancia:",
                 "speed-label": "Velocidad:",
                 "orbit-speed-label": "Vel. Órbitas:",
+                "galaxy-label": "Galaxia:",
                 "stars-label": "Estrellas:",
                 "fps-label": "FPS:",
                 "mode-toggle-text": "Modo:",
@@ -652,6 +647,7 @@
                 "distance-label": "Distance:",
                 "speed-label": "Speed:",
                 "orbit-speed-label": "Orbit Speed:",
+                "galaxy-label": "Galaxy:",
                 "stars-label": "Stars:",
                 "fps-label": "FPS:",
                 "mode-toggle-text": "Mode:",
@@ -683,6 +679,12 @@
             return x - Math.floor(x);
         }
         
+        // Generar nombre aleatorio para galaxia
+        function getRandomGalaxyName() {
+            const index = Math.floor(seededRandom() * GALAXY_NAMES.length);
+            return GALAXY_NAMES[index];
+        }
+        
         // Inicialización optimizada
         function init() {
             updateProgress(10);
@@ -690,15 +692,15 @@
             // Crear escena
             scene = new THREE.Scene();
             
-            // Crear cámara - Posición ajustada para ver estrellas
+            // Crear cámara
             const aspectRatio = window.innerWidth / window.innerHeight;
-            camera = new THREE.PerspectiveCamera(75, aspectRatio, 1, 1000000 * LIGHT_YEAR);
+            camera = new THREE.PerspectiveCamera(75, aspectRatio, 1, 1e6 * LIGHT_YEAR);
             camera.position.set(0, 5000 * LIGHT_YEAR, 10000 * LIGHT_YEAR);
             camera.lookAt(0, 0, 0);
             
             updateProgress(30);
             
-            // Crear renderizador con ajustes de rendimiento
+            // Crear renderizador
             renderer = new THREE.WebGLRenderer({ 
                 antialias: false,
                 alpha: true,
@@ -712,24 +714,14 @@
             const ambientLight = new THREE.AmbientLight(0x333333);
             scene.add(ambientLight);
             
-            // Añadir luz direccional para mejor iluminación
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
             directionalLight.position.set(1, 1, 1).normalize();
             scene.add(directionalLight);
             
             updateProgress(50);
             
-            // Crear galaxia procedural con distribución mejorada
-            createGalaxy();
-            
-            // Crear agujero negro central con cúmulo de estrellas
-            createBlackHoleCluster();
-            
-            // Crear nebulosas con probabilidad (20% de probabilidad)
-            if (Math.random() < 0.2) {
-                const nebulaCount = Math.floor(Math.random() * 3) + 1; // 1-3 nebulosas
-                createNebulae(nebulaCount);
-            }
+            // Crear galaxias
+            createGalaxies();
             
             updateProgress(70);
             
@@ -742,13 +734,9 @@
             // Obtener referencia al joystick interno
             joystickInner = document.querySelector('.joystick-inner');
             
-            // Iniciar la actualización continua de órbitas
-            startOrbitUpdates();
-            
-            // Ocultar pantalla de carga después de un breve delay
+            // Ocultar pantalla de carga
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
-                // Iniciar animación después de que todo esté cargado
                 animate();
             }, 800);
             
@@ -757,186 +745,128 @@
             document.getElementById('star-count').textContent = Object.keys(stars).length;
         }
         
-        // Iniciar actualización continua de órbitas
-        function startOrbitUpdates() {
-            // Actualizar órbitas independientemente del movimiento del jugador
-            orbitUpdateInterval = setInterval(() => {
-                if (!isPaused) {
-                    updateOrbits();
-                }
-            }, 16); // ~60 FPS
-        }
-        
-        // Detectar capacidades del dispositivo
-        function detectPerformance() {
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const memory = navigator.deviceMemory || 4;
-            
-            if (isMobile || memory < 4) {
-                performanceMode = 'low';
-                document.getElementById('performance-warning').style.display = 'block';
-            }
-        }
-        
         function updateProgress(percent) {
             document.getElementById('progress').style.width = percent + '%';
         }
         
-        // Crear nebulosas optimizadas
-        function createNebulae(count) {
+        // Crear textura para un planeta
+        function createPlanetTexture(type) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const context = canvas.getContext('2d');
+            
+            // Fondo base según tipo
+            if (type === 'terrestrial') {
+                context.fillStyle = '#1E3F73';
+                context.fillRect(0, 0, 256, 256);
+                
+                context.fillStyle = '#3D8B61';
+                for (let i = 0; i < 8; i++) {
+                    const x = Math.random() * 256;
+                    const y = Math.random() * 256;
+                    const size = 15 + Math.random() * 35;
+                    context.beginPath();
+                    context.arc(x, y, size, 0, Math.PI * 2);
+                    context.fill();
+                }
+            } else if (type === 'gas_giant') {
+                const hue = Math.random() * 360;
+                context.fillStyle = `hsl(${hue}, 70%, 30%)`;
+                context.fillRect(0, 0, 256, 256);
+                
+                // Bandas de nubes
+                for (let i = 0; i < 5; i++) {
+                    const y = Math.random() * 256;
+                    const height = 5 + Math.random() * 25;
+                    const bandHue = (hue + 20 - Math.random() * 40) % 360;
+                    context.fillStyle = `hsl(${bandHue}, 80%, ${40 + Math.random() * 30}%)`;
+                    context.fillRect(0, y, 256, height);
+                }
+            } else {
+                context.fillStyle = '#B3E0FF';
+                context.fillRect(0, 0, 256, 256);
+                
+                context.strokeStyle = '#99C2E0';
+                context.lineWidth = 1;
+                for (let i = 0; i < 30; i++) {
+                    context.beginPath();
+                    const startX = Math.random() * 256;
+                    const startY = Math.random() * 256;
+                    context.moveTo(startX, startY);
+                    context.lineTo(startX + (Math.random() - 0.5) * 50, startY + (Math.random() - 0.5) * 50);
+                    context.stroke();
+                }
+            }
+            
+            return new THREE.CanvasTexture(canvas);
+        }
+        
+        // Crear nebulosas
+        function createNebulae(count, offsetX = 0, offsetY = 0, offsetZ = 0) {
             for (let i = 0; i < count; i++) {
                 const angle = seededRandom() * Math.PI * 2;
                 const radius = 5000 + seededRandom() * (GALAXY_SIZE - 5000);
                 const height = (seededRandom() - 0.5) * GALAXY_SIZE / 20;
                 
-                const x = Math.cos(angle) * radius;
-                const y = height;
-                const z = Math.sin(angle) * radius;
+                const x = offsetX + Math.cos(angle) * radius;
+                const y = offsetY + height;
+                const z = offsetZ + Math.sin(angle) * radius;
                 
                 const size = 50 + seededRandom() * 150;
                 const color = NEBULA_COLORS[Math.floor(seededRandom() * NEBULA_COLORS.length)];
                 
                 const geometry = new THREE.SphereGeometry(size, 8, 6);
-                
                 const material = new THREE.MeshBasicMaterial({
                     color: color,
                     transparent: true,
                     opacity: 0.15,
-                    blending: THREE.AdditiveBlending,
-                    wireframe: false
+                    blending: THREE.AdditiveBlending
                 });
                 
                 const nebula = new THREE.Mesh(geometry, material);
                 nebula.position.set(x, y, z);
-                
                 scene.add(nebula);
                 nebulae.push(nebula);
             }
         }
         
-        // Crear agujero negro central con cúmulo de estrellas
-        function createBlackHoleCluster() {
-            // Crear el agujero negro
-            const blackHoleGeometry = new THREE.SphereGeometry(100, 32, 32);
-            
-            // Crear un material especial para el agujero negro
-            const blackHoleMaterial = new THREE.MeshBasicMaterial({
-                color: 0x000000,
-                emissive: 0x220022,
-                emissiveIntensity: 0.8,
-                transparent: true,
-                opacity: 0.9
-            });
-            
-            blackHole = new THREE.Mesh(blackHoleGeometry, blackHoleMaterial);
-            blackHole.position.set(0, 0, 0);
-            scene.add(blackHole);
-            
-            // Añadir disco de acreción
-            const accretionDiskGeometry = new THREE.RingGeometry(120, 300, 64);
-            const accretionDiskMaterial = new THREE.MeshBasicMaterial({
-                color: 0xff9900,
-                side: THREE.DoubleSide,
-                transparent: true,
-                opacity: 0.7,
-                blending: THREE.AdditiveBlending
-            });
-            
-            const accretionDisk = new THREE.Mesh(accretionDiskGeometry, accretionDiskMaterial);
-            accretionDisk.rotation.x = Math.PI / 2;
-            accretionDisk.position.set(0, 0, 0);
-            scene.add(accretionDisk);
-            
-            // Crear 10 estrellas orbitando alrededor del agujero negro
-            for (let i = 0; i < 10; i++) {
-                const angle = (i / 10) * Math.PI * 2;
-                const distance = 500 + (i * 100);
-                
-                const x = Math.cos(angle) * distance;
-                const z = Math.sin(angle) * distance;
-                
-                // Estrellas más brillantes cerca del agujero negro
-                const starRadius = 5 + (i * 0.5);
-                const starGeometry = new THREE.SphereGeometry(starRadius, 16, 16);
-                const starMaterial = new THREE.MeshBasicMaterial({
-                    color: 0xffffff,
-                    emissive: 0xffffff,
-                    emissiveIntensity: 3.0
-                });
-                
-                const starMesh = new THREE.Mesh(starGeometry, starMaterial);
-                starMesh.position.set(x, 0, z);
-                
-                // Añadir punto de luz
-                const starLight = new THREE.PointLight(0xffffff, 2.0, 1000);
-                starLight.position.set(x, 0, z);
-                
-                scene.add(starMesh);
-                scene.add(starLight);
-                
-                // Almacenar datos de la estrella del cúmulo
-                const name = `BH-${i+1}`;
-                stars[name] = {
-                    mesh: starMesh,
-                    light: starLight,
-                    radius: starRadius,
-                    name: name,
-                    type: 'S', // Especial para estrellas del cúmulo
-                    distance: distance,
-                    position: new THREE.Vector3(x, 0, z),
-                    planets: [],
-                    orbitRadius: distance,
-                    orbitSpeed: 0.001 * (10 - i),
-                    orbitAngle: angle
-                };
-                
-                blackHoleCluster.push(stars[name]);
-            }
-        }
-        
-        // Generar un planeta con características únicas
-        function generatePlanet(star, index, starRadius) {
-            // Distancia orbital basada en el índice del planeta y el radio de la estrella
-            // Asegurar que los planetas no estén dentro de la estrella ni demasiado lejos
-            const baseOrbitDistance = starRadius * 10; // Distancia base desde la estrella
+        // Generar un planeta
+        function generatePlanet(star, index, starRadius, offsetX = 0, offsetY = 0, offsetZ = 0) {
+            const baseOrbitDistance = starRadius * 10;
             const orbitDistance = baseOrbitDistance * (index + 1) * (1 + seededRandom() * 0.5);
             
-            // Seleccionar tipo de planeta aleatoriamente
             const planetTypes = Object.keys(PLANET_TYPES);
             const planetType = planetTypes[Math.floor(seededRandom() * planetTypes.length)];
             const planetInfo = PLANET_TYPES[planetType];
             
-            // Generar características del planeta
-            const planetSize = starRadius * (0.1 + seededRandom() * 0.3) * (planetInfo.radiusRange[0] + 
+            let planetSize = starRadius * (0.1 + seededRandom() * 0.3) * (planetInfo.radiusRange[0] + 
                               seededRandom() * (planetInfo.radiusRange[1] - planetInfo.radiusRange[0]));
             
-            const planetSpeed = 0.005 / (index + 1); // Velocidad orbital más lenta para planetas exteriores
+            planetSize = Math.min(planetSize, starRadius * 0.8);
+            
+            const planetSpeed = 0.005 / (index + 1);
             const planetAngle = seededRandom() * Math.PI * 2;
             
-            // Generar datos adicionales
             const planetDay = planetInfo.dayRange[0] + seededRandom() * (planetInfo.dayRange[1] - planetInfo.dayRange[0]);
             const planetTemp = planetInfo.tempRange[0] + seededRandom() * (planetInfo.tempRange[1] - planetInfo.tempRange[0]);
             
-            // Malla para planeta
-            const planetGeometry = new THREE.SphereGeometry(planetSize, 8, 6); // Reducida la calidad para mejor rendimiento
+            const planetTexture = createPlanetTexture(planetType);
+            const planetGeometry = new THREE.SphereGeometry(planetSize, 16, 16);
             const planetMaterial = new THREE.MeshLambertMaterial({ 
-                color: planetInfo.color,
-                emissive: planetInfo.color,
-                emissiveIntensity: 0.1
+                map: planetTexture
             });
             
             const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
             
-            // Posicionar el planeta a la distancia correcta de la estrella
             planetMesh.position.set(
-                star.position.x + Math.cos(planetAngle) * orbitDistance,
-                star.position.y + (seededRandom() - 0.5) * 0.0001,
-                star.position.z + Math.sin(planetAngle) * orbitDistance
+                offsetX + star.position.x + Math.cos(planetAngle) * orbitDistance,
+                offsetY + star.position.y,
+                offsetZ + star.position.z + Math.sin(planetAngle) * orbitDistance
             );
             
             scene.add(planetMesh);
             
-            // Crear objeto planeta con toda su información
             const planetData = {
                 mesh: planetMesh,
                 orbitRadius: orbitDistance,
@@ -953,18 +883,16 @@
                 star: star.name
             };
             
-            // Añadir a la lista global de planetas
             planets.push(planetData);
-            
             return planetData;
         }
         
-        // Crear galaxia optimizada
-        function createGalaxy() {
+        // Crear galaxia
+        function createGalaxy(offsetX = 0, offsetY = 0, offsetZ = 0, galaxyType = 0) {
             const placedPositions = [];
+            const galaxyStars = {};
             
-            // Tipos de estrellas con más variedad
-            const starTypes = ['O', 'B', 'A', 'F', 'G', 'K', 'M', 'R', 'S', 'N'];
+            const starTypes = ['O', 'B', 'A', 'F', 'G', 'K', 'M'];
             
             for (let i = 0; i < STAR_COUNT; i++) {
                 let attempts = 0;
@@ -976,12 +904,16 @@
                     const galacticRadius = 1000 + seededRandom() * (GALAXY_SIZE - 1000);
                     const height = (seededRandom() - 0.5) * GALAXY_SIZE / 15;
                     
-                    x = Math.cos(angle) * galacticRadius;
-                    y = height;
-                    z = Math.sin(angle) * galacticRadius;
+                    x = offsetX + Math.cos(angle) * galacticRadius;
+                    y = offsetY + height;
+                    z = offsetZ + Math.sin(angle) * galacticRadius;
                     
-                    // Evitar colisión con el cúmulo central
-                    const distanceToCenter = Math.sqrt(x*x + y*y + z*z);
+                    const distanceToCenter = Math.sqrt(
+                        Math.pow(x - offsetX, 2) + 
+                        Math.pow(y - offsetY, 2) + 
+                        Math.pow(z - offsetZ, 2)
+                    );
+                    
                     if (distanceToCenter < 2000) {
                         attempts++;
                         continue;
@@ -1008,20 +940,15 @@
                 
                 placedPositions.push({x, y, z});
                 
-                // Distribución más realista de tipos de estrellas
                 const typeIndex = Math.floor(Math.pow(seededRandom(), 1.5) * starTypes.length);
                 const starType = starTypes[typeIndex];
                 const starColor = STAR_COLORS[starType];
                 
-                // Aumentar el tamaño de las estrellas para que sean visibles desde lejos
-                const sizeFactors = { 
-                    O: 2.0, B: 1.5, A: 1.2, F: 1.0, G: 0.8, K: 0.6, M: 0.5, R: 0.7, S: 0.9, N: 1.1 
-                };
+                const sizeFactors = { O: 2.0, B: 1.5, A: 1.2, F: 1.0, G: 0.8, K: 0.6, M: 0.5 };
                 const starRadius = (sizeFactors[starType] || 1.0) * (0.9 + seededRandom() * 0.2) * 15;
                 
-                const name = `HIP ${Math.floor(10000 + seededRandom() * 90000)}`;
+                const name = `HIP ${Math.floor(10000 + seededRandom() * 90000)}-${galaxyType}`;
                 
-                // Crear malla para estrella - más brillante
                 const starGeometry = new THREE.SphereGeometry(starRadius, 12, 10);
                 const starMaterial = new THREE.MeshBasicMaterial({
                     color: starColor,
@@ -1032,45 +959,81 @@
                 
                 const starMesh = new THREE.Mesh(starGeometry, starMaterial);
                 starMesh.position.set(x, y, z);
-                starMesh.frustumCulled = false; // Evitar que desaparezcan
                 
-                // Añadir punto de luz para hacerla más visible
-                const starLight = new THREE.PointLight(starColor, 2.5, 5000 * LIGHT_YEAR, 1.5);
+                const starLight = new THREE.PointLight(starColor, 2.5, 5000 * LIGHT_YEAR);
                 starLight.position.set(x, y, z);
                 scene.add(starLight);
-                
                 scene.add(starMesh);
                 
-                // Generar sistema planetario aleatorio (30% de probabilidad)
                 const planetCount = Math.floor(seededRandom() * (MAX_PLANETS - MIN_PLANETS + 1)) + MIN_PLANETS;
                 const starPlanets = [];
                 
-                // 30% de probabilidad de generar planetas
                 if (seededRandom() < 0.3) {
                     for (let p = 0; p < planetCount; p++) {
-                        // Generar el planeta
-                        const planet = generatePlanet({position: {x, y, z}, name, radius: starRadius}, p, starRadius);
+                        const planet = generatePlanet(
+                            {position: {x, y, z}, name, radius: starRadius}, 
+                            p, 
+                            starRadius,
+                            offsetX,
+                            offsetY,
+                            offsetZ
+                        );
                         starPlanets.push(planet);
                     }
                 }
                 
-                // Almacenar datos de la estrella
-                stars[name] = {
+                galaxyStars[name] = {
                     mesh: starMesh,
                     light: starLight,
                     radius: starRadius,
                     name: name,
                     type: starType,
-                    distance: Math.sqrt(x*x + y*y + z*z),
+                    distance: Math.sqrt(
+                        Math.pow(x - offsetX, 2) + 
+                        Math.pow(y - offsetY, 2) + 
+                        Math.pow(z - offsetZ, 2)
+                    ),
                     position: new THREE.Vector3(x, y, z),
                     planets: starPlanets
                 };
             }
+            
+            return galaxyStars;
+        }
+        
+        // Crear múltiples galaxias (solo 3)
+        function createGalaxies() {
+            // Galaxia 1
+            const galaxyName1 = getRandomGalaxyName();
+            const galaxy1Stars = createGalaxy(0, 0, 0, 0);
+            createNebulae(3, 0, 0, 0);
+            
+            // Galaxia 2
+            const galaxyName2 = getRandomGalaxyName();
+            const galaxy2Stars = createGalaxy(INTERGALACTIC_DISTANCE, 0, 0, 1);
+            createNebulae(2, INTERGALACTIC_DISTANCE, 0, 0);
+            
+            // Galaxia 3
+            const galaxyName3 = getRandomGalaxyName();
+            const galaxy3Stars = createGalaxy(0, 0, INTERGALACTIC_DISTANCE, 2);
+            createNebulae(2, 0, 0, INTERGALACTIC_DISTANCE);
+            
+            // Combinar todas las estrellas
+            stars = Object.assign({}, galaxy1Stars, galaxy2Stars, galaxy3Stars);
+            
+            // Almacenar información de galaxias
+            galaxies = [
+                {stars: galaxy1Stars, name: galaxyName1},
+                {stars: galaxy2Stars, name: galaxyName2},
+                {stars: galaxy3Stars, name: galaxyName3}
+            ];
+            
+            // Actualizar información de la galaxia actual
+            document.getElementById('galaxy-value').textContent = currentLanguage === 'es' ? galaxyName1.es : galaxyName1.en;
         }
         
         // Configurar joystick de movimiento
         function setupJoystick() {
-            // Implementación básica de joystick virtual
             const joystickArea = document.getElementById('movement-joystick');
             let isTouching = false;
             let touchId = null;
@@ -1093,7 +1056,6 @@
                 e.preventDefault();
                 if (!isTouching) return;
                 
-                // Encontrar el touch correcto
                 let touch = null;
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     if (e.changedTouches[i].identifier === touchId) {
@@ -1108,21 +1070,18 @@
                 const x = touch.clientX - rect.left;
                 const y = touch.clientY - rect.top;
                 
-                // Calcular dirección y fuerza
                 const dx = (x - startX) / (rect.width / 2);
-                const dy = (y - startY) / (rect.height / 2);
+                const dy = (startY - y) / (rect.height / 2);
                 
-                // Limitar a círculo
                 const distance = Math.min(1, Math.sqrt(dx * dx + dy * dy));
                 const angle = Math.atan2(dy, dx);
                 
-                moveDirection.x = -Math.cos(angle) * distance;
-                moveDirection.z = -Math.sin(angle) * distance;
+                moveDirection.x = Math.cos(angle) * distance;
+                moveDirection.z = Math.sin(angle) * distance;
                 
-                // Actualizar posición visual del joystick interno
                 if (joystickInner) {
                     const maxMovement = 25;
-                    joystickInner.style.transform = `translate(${dx * maxMovement}px, ${dy * maxMovement}px)`;
+                    joystickInner.style.transform = `translate(${dx * maxMovement}px, ${-dy * maxMovement}px)`;
                 }
             });
             
@@ -1130,7 +1089,6 @@
                 e.preventDefault();
                 if (!isTouching) return;
                 
-                // Verificar si es el touch correcto
                 let isCorrectTouch = false;
                 for (let i = 0; i < e.changedTouches.length; i++) {
                     if (e.changedTouches[i].identifier === touchId) {
@@ -1144,7 +1102,6 @@
                     moveDirection.x = 0;
                     moveDirection.z = 0;
                     
-                    // Resetear posición visual del joystick
                     if (joystickInner) {
                         joystickInner.style.transform = 'translate(0, 0)';
                     }
@@ -1157,49 +1114,31 @@
                 moveDirection.x = 0;
                 moveDirection.z = 0;
                 
-                // Resetear posición visual del joystick
                 if (joystickInner) {
                     joystickInner.style.transform = 'translate(0, 0)';
                 }
             });
         }
         
-        // Actualizar órbitas de planetas y estrellas
-        function updateOrbits() {
-            const cameraPos = camera.position;
-            
-            for (const starName in stars) {
-                const star = stars[starName];
-                const distanceToStar = cameraPos.distanceTo(star.position);
+        // Actualizar órbitas de planetas
+        function updateOrbits(time) {
+            if (!isPaused && time - lastOrbitUpdate > orbitUpdateThreshold) {
+                lastOrbitUpdate = time;
                 
-                // Solo actualizar estrellas cercanas (optimización)
-                if (distanceToStar > 5000 * LIGHT_YEAR) continue;
-                
-                // Mover planetas
-                for (const planet of star.planets) {
-                    planet.angle += planet.speed * orbitSpeed;
+                for (const starName in stars) {
+                    const star = stars[starName];
                     
-                    const newX = star.position.x + Math.cos(planet.angle) * planet.orbitRadius;
-                    const newZ = star.position.z + Math.sin(planet.angle) * planet.orbitRadius;
-                    
-                    if (planet.mesh) {
-                        planet.mesh.position.setX(newX);
-                        planet.mesh.position.setZ(newZ);
-                        planet.mesh.rotation.y += 0.01 * orbitSpeed;
-                    }
-                }
-                
-                // Mover estrellas del cúmulo del agujero negro
-                if (star.orbitRadius) {
-                    star.orbitAngle += star.orbitSpeed * orbitSpeed;
-                    const newX = Math.cos(star.orbitAngle) * star.orbitRadius;
-                    const newZ = Math.sin(star.orbitAngle) * star.orbitRadius;
-                    
-                    star.mesh.position.setX(newX);
-                    star.mesh.position.setZ(newZ);
-                    if (star.light) {
-                        star.light.position.setX(newX);
-                        star.light.position.setZ(newZ);
+                    for (const planet of star.planets) {
+                        planet.angle += planet.speed * orbitSpeed;
+                        
+                        const newX = star.position.x + Math.cos(planet.angle) * planet.orbitRadius;
+                        const newZ = star.position.z + Math.sin(planet.angle) * planet.orbitRadius;
+                        
+                        if (planet.mesh) {
+                            planet.mesh.position.setX(newX);
+                            planet.mesh.position.setZ(newZ);
+                            planet.mesh.rotation.y += 0.01 * orbitSpeed;
+                        }
                     }
                 }
             }
@@ -1212,62 +1151,55 @@
             
             lookButtons.forEach(id => {
                 const button = document.getElementById(id);
+                const direction = id.split('-')[1];
+                
                 button.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    lookActive[id.split('-')[1]] = true;
+                    if (direction === 'up') lookActive.down = true;
+                    else if (direction === 'down') lookActive.up = true;
+                    else if (direction === 'left') lookActive.right = true;
+                    else if (direction === 'right') lookActive.left = true;
                 });
+                
                 button.addEventListener('touchend', (e) => {
                     e.preventDefault();
-                    lookActive[id.split('-')[1]] = false;
+                    if (direction === 'up') lookActive.down = false;
+                    else if (direction === 'down') lookActive.up = false;
+                    else if (direction === 'left') lookActive.right = false;
+                    else if (direction === 'right') lookActive.left = false;
                 });
-                button.addEventListener('touchcancel', (e) => {
-                    e.preventDefault();
-                    lookActive[id.split('-')[1]] = false;
-                });
+                
                 button.addEventListener('mousedown', (e) => {
                     e.preventDefault();
-                    lookActive[id.split('-')[1]] = true;
+                    if (direction === 'up') lookActive.down = true;
+                    else if (direction === 'down') lookActive.up = true;
+                    else if (direction === 'left') lookActive.right = true;
+                    else if (direction === 'right') lookActive.left = true;
                 });
+                
                 button.addEventListener('mouseup', (e) => {
                     e.preventDefault();
-                    lookActive[id.split('-')[1]] = false;
-                });
-                button.addEventListener('mouseleave', (e) => {
-                    e.preventDefault();
-                    lookActive[id.split('-')[1]] = false;
+                    if (direction === 'up') lookActive.down = false;
+                    else if (direction === 'down') lookActive.up = false;
+                    else if (direction === 'left') lookActive.right = false;
+                    else if (direction === 'right') lookActive.left = false;
                 });
             });
             
             document.getElementById('look-center').addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                if (currentStar) {
-                    camera.lookAt(currentStar.position);
-                } else {
-                    camera.lookAt(0, 0, 0);
-                }
+                camera.lookAt(0, 0, 0);
             });
             
             document.getElementById('look-center').addEventListener('mousedown', (e) => {
                 e.preventDefault();
-                if (currentStar) {
-                    camera.lookAt(currentStar.position);
-                } else {
-                    camera.lookAt(0, 0, 0);
-                }
-            });
-            
-            // Botones de control
-            document.getElementById('mode-toggle').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (viewMode === 'orbital') {
-                    switchToOrbitalMode();
-                }
+                camera.lookAt(0, 0, 0);
             });
             
             // Controles de velocidad
             document.getElementById('player-speed-btn').addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                const speeds = [0.01, 0.1, 0.5, 1, 5, 10, 50, 100, 500, 1000, 5000, 10000];
+                const speeds = [0.01, 0.1, 0.5, 1, 5, 10, 50, 100];
                 const currentIndex = speeds.indexOf(playerSpeed);
                 playerSpeed = speeds[(currentIndex + 1) % speeds.length];
                 updateSpeedButtons();
@@ -1276,7 +1208,7 @@
             
             document.getElementById('orbit-speed-btn').addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                const speeds = [0, 0.01, 0.1, 0.5, 1, 2, 5, 10];
+                const speeds = [0, 0.01, 0.1, 0.5, 1, 2, 5];
                 const currentIndex = speeds.indexOf(orbitSpeed);
                 orbitSpeed = speeds[(currentIndex + 1) % speeds.length];
                 updateSpeedButtons();
@@ -1290,7 +1222,7 @@
                 updateUI();
             });
             
-            // Evento para seleccionar estrellas y planetas al tocar
+            // Evento para seleccionar estrellas y planetas
             renderer.domElement.addEventListener('touchstart', handleSelection, { passive: true });
             renderer.domElement.addEventListener('mousedown', handleSelection);
             
@@ -1330,7 +1262,6 @@
             mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
             mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
             
-            // Usar raycaster para detectar estrellas y planetas
             raycaster.setFromCamera(mouse, camera);
             
             // Primero verificar si se hizo clic en un planeta
@@ -1341,13 +1272,11 @@
                 const planetPosition = planet.mesh.position;
                 const distance = camera.position.distanceTo(planetPosition);
                 
-                // Solo considerar planetas dentro de un rango razonable
                 if (distance < 5000 * LIGHT_YEAR) {
                     const screenPosition = new THREE.Vector3();
                     screenPosition.copy(planetPosition);
                     screenPosition.project(camera);
                     
-                    // Calcular la distancia en pantalla
                     const dx = mouse.x - screenPosition.x;
                     const dy = mouse.y - screenPosition.y;
                     const screenDistance = Math.sqrt(dx * dx + dy * dy);
@@ -1373,13 +1302,11 @@
                 const starPosition = star.position;
                 const distance = camera.position.distanceTo(starPosition);
                 
-                // Solo considerar estrellas dentro de un rango razonable
                 if (distance < 50000 * LIGHT_YEAR) {
                     const screenPosition = new THREE.Vector3();
                     screenPosition.copy(starPosition);
                     screenPosition.project(camera);
                     
-                    // Calcular la distancia en pantalla
                     const dx = mouse.x - screenPosition.x;
                     const dy = mouse.y - screenPosition.y;
                     const screenDistance = Math.sqrt(dx * dx + dy * dy);
@@ -1394,7 +1321,6 @@
             if (closestStar) {
                 selectStar(closestStar);
             } else {
-                // Si no se seleccionó nada, ocultar la información
                 document.getElementById('selected-star-info').style.display = 'none';
                 document.getElementById('star-marker').style.display = 'none';
                 selectedStar = null;
@@ -1405,25 +1331,21 @@
         function selectStar(star) {
             selectedStar = star;
             
-            // Actualizar información de la estrella seleccionada
             document.getElementById('selected-star-name').textContent = star.name;
             document.getElementById('selected-star-distance').textContent = `${currentLanguage === 'es' ? 'Distancia:' : 'Distance:'} ${Math.round(star.distance)} ${currentLanguage === 'es' ? 'AL' : 'LY'}`;
             document.getElementById('selected-star-type').textContent = `${currentLanguage === 'es' ? 'Tipo:' : 'Type:'} ${star.type}`;
             document.getElementById('selected-star-planets').textContent = `${currentLanguage === 'es' ? 'Planetas:' : 'Planets:'} ${star.planets.length}`;
             
-            // Mostrar información
             document.getElementById('selected-star-info').style.display = 'block';
             
-            // Mostrar marcador en la estrella
             const marker = document.getElementById('star-marker');
             marker.style.display = 'block';
             
-            // Actualizar posición del marcador
             function updateMarkerPosition() {
                 if (!selectedStar) return;
                 
                 const vector = new THREE.Vector3();
-                vector.setFromMatrixPosition(selectedStar.mesh.matrixWorld);
+                vector.setFromMatrixPosition(star.mesh.matrixWorld);
                 vector.project(camera);
                 
                 const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
@@ -1442,7 +1364,6 @@
         function selectPlanet(planet) {
             selectedPlanet = planet;
             
-            // Actualizar información del planeta seleccionado
             document.getElementById('selected-planet-name').textContent = currentLanguage === 'es' ? planet.name : planet.name_en;
             document.getElementById('selected-planet-type').textContent = `${currentLanguage === 'es' ? 'Tipo:' : 'Type:'} ${currentLanguage === 'es' ? PLANET_TYPES[planet.type].name : PLANET_TYPES[planet.type].name_en}`;
             document.getElementById('selected-planet-radius').textContent = `${currentLanguage === 'es' ? 'Radio:' : 'Radius:'} ${planet.radius.toFixed(2)} u`;
@@ -1450,7 +1371,6 @@
             document.getElementById('selected-planet-temp').textContent = `${currentLanguage === 'es' ? 'Temperatura:' : 'Temperature:'} ${planet.temperature.toFixed(1)}°C`;
             document.getElementById('selected-planet-desc').textContent = `${currentLanguage === 'es' ? 'Descripción:' : 'Description:'} ${currentLanguage === 'es' ? planet.description : planet.description_en}`;
             
-            // Mostrar información
             document.getElementById('selected-planet-info').style.display = 'block';
         }
         
@@ -1465,11 +1385,9 @@
             if (selectedStar) {
                 targetStar = selectedStar;
                 
-                // Mostrar indicador de objetivo
                 const indicator = document.getElementById('target-indicator');
                 indicator.style.display = 'block';
                 
-                // Actualizar posición del indicador
                 function updateTargetIndicator() {
                     if (!targetStar) {
                         indicator.style.display = 'none';
@@ -1483,7 +1401,6 @@
                     const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
                     const y = (-(vector.y * 0.5 + 0.5)) * window.innerHeight;
                     
-                    // Solo mostrar si está en pantalla
                     if (x >= 0 && x <= window.innerWidth && y >= 0 && y <= window.innerHeight) {
                         indicator.style.display = 'block';
                         indicator.style.left = `${x}px`;
@@ -1497,7 +1414,6 @@
                 
                 updateTargetIndicator();
                 
-                // Ocultar información después de establecer objetivo
                 document.getElementById('selected-star-info').style.display = 'none';
             }
         }
@@ -1506,21 +1422,7 @@
         function switchToOrbitalMode() {
             viewMode = 'orbital';
             currentScale = 1.0;
-            
             updateModeToggle();
-            updateUI();
-        }
-        
-        // Actualizar escala de la cámara
-        function updateCameraScale() {
-            if (viewMode === 'surface') {
-                camera.near = 0.0000001 * currentScale;
-                camera.far = 1000000;
-            } else {
-                camera.near = 0.1 * currentScale;
-                camera.far = 1000000 * currentScale;
-            }
-            camera.updateProjectionMatrix();
             updateUI();
         }
         
@@ -1554,35 +1456,13 @@
             }
         }
         
-        // Ajustar visibilidad de estrellas según la distancia
-        function updateStarVisibility() {
-            const cameraPos = camera.position;
-            
-            for (const starName in stars) {
-                const star = stars[starName];
-                const distanceToStar = cameraPos.distanceTo(star.position);
-                
-                // Ajustar la visibilidad según la distancia
-                const visibility = Math.min(1, 10000 / distanceToStar);
-                star.mesh.material.opacity = visibility;
-                star.mesh.scale.set(visibility, visibility, visibility);
-                
-                // Ajustar la intensidad de la luz
-                if (star.light) {
-                    star.light.intensity = Math.min(2.5, 25000 / distanceToStar);
-                }
-            }
-        }
-        
         // Configurar sistema de idiomas
         function setLanguage(lang) {
             currentLanguage = lang;
             
-            // Actualizar botones de idioma
             document.getElementById('lang-es').classList.toggle('active', lang === 'es');
             document.getElementById('lang-en').classList.toggle('active', lang === 'en');
             
-            // Actualizar todos los textos de la interfaz
             for (const key in translations[lang]) {
                 const elements = document.querySelectorAll(`[id="${key}"]`);
                 elements.forEach(el => {
@@ -1592,22 +1472,18 @@
                 });
             }
             
-            // Actualizar botones de velocidad
             updateSpeedButtons();
             updatePauseButton();
             updateModeToggle();
             
-            // Actualizar información de estrella seleccionada si está visible
             if (selectedStar) {
                 selectStar(selectedStar);
             }
             
-            // Actualizar información de planeta seleccionado si está visible
             if (selectedPlanet) {
                 selectPlanet(selectedPlanet);
             }
             
-            // Actualizar UI
             updateUI();
         }
         
@@ -1636,25 +1512,19 @@
         function animate(time) {
             requestAnimationFrame(animate);
             
-            // Control de FPS para mejorar rendimiento
             const delta = time - lastTime;
             lastTime = time;
             
-            if (delta < 1000 / 20) {
-                return;
-            }
-            
-            // Actualizar FPS siempre
             updateFPS();
             
-            // Aplicar movimiento de mirada siempre (incluso en pausa)
-            if (lookActive.up) camera.rotation.x -= 0.03;
-            if (lookActive.down) camera.rotation.x += 0.03;
-            if (lookActive.left) camera.rotation.y -= 0.03;
-            if (lookActive.right) camera.rotation.y += 0.03;
+            if (lookActive.up) camera.rotation.x += 0.03;
+            if (lookActive.down) camera.rotation.x -= 0.03;
+            if (lookActive.left) camera.rotation.y += 0.03;
+            if (lookActive.right) camera.rotation.y -= 0.03;
+            
+            updateOrbits(time);
             
             if (!isPaused) {
-                // Aplicar movimiento con velocidad adecuada
                 const moveSpeed = (viewMode === 'surface') ? 1e-9 * playerSpeed * currentScale : playerSpeed * currentScale;
                 
                 const forward = new THREE.Vector3();
@@ -1663,15 +1533,11 @@
                 right.crossVectors(new THREE.Vector3(0, 1, 0), forward).normalize();
                 
                 const moveVector = new THREE.Vector3();
-                moveVector.addScaledVector(forward, -moveDirection.z * moveSpeed);
-                moveVector.addScaledVector(right, -moveDirection.x * moveSpeed);
+                moveVector.addScaledVector(forward, moveDirection.z * moveSpeed);
+                moveVector.addScaledVector(right, moveDirection.x * moveSpeed);
                 
                 camera.position.add(moveVector);
                 
-                // Actualizar visibilidad de estrellas
-                updateStarVisibility();
-                
-                // Si hay un objetivo, mirar hacia él automáticamente a alta velocidad
                 if (targetStar && playerSpeed >= 1000) {
                     camera.lookAt(targetStar.position);
                 }
@@ -1684,4 +1550,4 @@
         init();
     </script>
 </body>
-</html>
+</html>                   
